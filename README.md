@@ -1,0 +1,2 @@
+# BioInformatyka-Motorola
+Init
