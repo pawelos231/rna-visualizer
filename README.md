@@ -1,2 +1,2 @@
 # BioInformatyka-Motorola
-Init
+Project will be written in rust
