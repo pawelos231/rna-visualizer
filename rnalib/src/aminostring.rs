@@ -79,10 +79,16 @@ impl AminoString {
 
 impl Display for AminoString {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		let mut string = String::new();
+		string.push('[');
 		for i in &self.codons {
-			f.write_char(i.get_acid())?;
-			f.write_char(',')?;
+			string.push(i.get_acid());
+			string.push(',');
+			string.push(' ');
 		}
-		Ok(())
+		string.pop();
+		string.pop();
+		string.push(']');
+		f.write_str(&string)
 	}
 }
