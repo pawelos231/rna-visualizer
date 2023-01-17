@@ -46,9 +46,6 @@ impl AminoString {
 	}
 
 	pub fn get_proteins(&self) -> Vec<Protein> {
-		const START: char = Codon::get_start();
-		const STOP: char = Codon::get_stop();
-
 		let mut res = Vec::new();
 
 		let mut current = Vec::new();
@@ -56,7 +53,7 @@ impl AminoString {
 		for codon in &self.codons {
 			let acid = codon.get_acid();
 
-			if acid == STOP {
+			if acid == Codon::STOP {
 				if protein {
 					let mut new = Vec::new();
 					std::mem::swap(&mut current, &mut new);
@@ -68,7 +65,7 @@ impl AminoString {
 				current.push(codon.clone());
 			}
 
-			if acid == START {
+			if acid == Codon::START {
 				protein = true;
 			}
 		}

@@ -8,18 +8,13 @@ pub struct Codon {
 }
 
 impl Codon {
+	pub const STOP: char = '_';
+	pub const START: char = 'M';
+
 	pub fn new(a: Nucleotide, b: Nucleotide, c: Nucleotide) -> Self {
 		Self {
 			nucleotides: (a, b, c),
 		}
-	}
-
-	pub const fn get_stop() -> char {
-		'_'
-	}
-
-	pub const fn get_start() -> char {
-		'M'
 	}
 
 	pub fn get_acid(&self) -> char {
@@ -29,9 +24,9 @@ impl Codon {
 			(U, U, A | G) => 'L',
 			(U, C, _) => 'S',
 			(U, A, U | C) => 'Y',
-			(U, A, A | G) => Self::get_stop(),
+			(U, A, A | G) => Self::STOP,
 			(U, G, U | C) => 'C',
-			(U, G, A) => Self::get_stop(),
+			(U, G, A) => Self::STOP,
 			(U, G, G) => 'W',
 
 			(C, U, _) => 'L',
