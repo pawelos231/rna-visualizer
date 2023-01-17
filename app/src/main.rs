@@ -9,10 +9,10 @@ fn main() {
 
 	let amino_strings = AminoString::parse(buffer);
 	for amino in amino_strings {
-		println!("{amino}:");
+		println!("{amino}");
 		for protein in amino.get_proteins() {
 			println!("{protein}");
 		}
-		println!("=========================");
+		println!()
 	}
 }

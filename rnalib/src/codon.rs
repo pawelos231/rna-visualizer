@@ -3,9 +3,17 @@ use std::fmt::{Display, Write};
 use crate::Nucleotide;
 
 #[derive(Clone)]
-pub struct Codon(pub (Nucleotide, Nucleotide, Nucleotide));
+pub struct Codon {
+	nucleotides: (Nucleotide, Nucleotide, Nucleotide),
+}
 
 impl Codon {
+	pub fn new(a: Nucleotide, b: Nucleotide, c: Nucleotide) -> Self {
+		Self {
+			nucleotides: (a, b, c),
+		}
+	}
+
 	pub const fn get_stop() -> char {
 		'_'
 	}
@@ -16,7 +24,7 @@ impl Codon {
 
 	pub fn get_acid(&self) -> char {
 		use Nucleotide::*;
-		match self.0 {
+		match self.nucleotides {
 			(U, U, U | C) => 'F',
 			(U, U, A | G) => 'L',
 			(U, C, _) => 'S',
@@ -46,7 +54,6 @@ impl Codon {
 			(G, A, A | G) => 'E',
 			(G, G, _) => 'G',
 		}
-		.into()
 	}
 }
 
