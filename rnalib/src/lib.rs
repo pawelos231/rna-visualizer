@@ -1,9 +1,9 @@
 mod aminostring;
 mod codon;
-mod nucleotyde;
+mod nucleotide;
 mod protein;
 
 pub use aminostring::*;
 pub use codon::*;
-pub use nucleotyde::*;
+pub use nucleotide::*;
 pub use protein::*;

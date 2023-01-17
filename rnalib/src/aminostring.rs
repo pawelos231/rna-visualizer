@@ -1,4 +1,4 @@
-use std::fmt::{Display, Write};
+use std::fmt::Display;
 
 use itertools::Itertools;
 
@@ -21,7 +21,7 @@ impl AminoString {
 		self.codons.push(codon);
 	}
 
-	pub fn parse(source: String) -> Vec<Self> {
+	pub fn parse(source: &str) -> Vec<Self> {
 		let mut source = source.replace(" ", "");
 		let mut res = Vec::new();
 

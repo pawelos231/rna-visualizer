@@ -7,7 +7,7 @@ fn main() {
 		.expect("konsola sie wyjebała");
 	buffer = buffer.trim().into();
 
-	let amino_strings = AminoString::parse(buffer);
+	let amino_strings = AminoString::parse(&buffer);
 	for amino in amino_strings {
 		println!("{amino}");
 		for protein in amino.get_proteins() {
