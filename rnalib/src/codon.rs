@@ -36,7 +36,7 @@ impl Codon {
 			(C, G, _) => 'R',
 
 			(A, U, A | C | U) => 'I',
-			(A, U, G) => 'M',
+			(A, U, G) => Self::START,
 			(A, C, _) => 'T',
 			(A, A, C | U) => 'N',
 			(A, A, G | A) => 'K',
