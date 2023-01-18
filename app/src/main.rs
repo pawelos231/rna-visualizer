@@ -13,7 +13,5 @@ fn main() {
 		println!("{amino}, {} protein(s)", proteins.len());
 		proteins.iter().for_each(|x| println!("• {x}"));
 		println!();
-
-		rnavis::make_vis(proteins.last().unwrap());
 	}
 }

@@ -1,6 +1,8 @@
-use std::fmt;
+use concat_idents::concat_idents;
+use const_str::*;
+use std::fmt::{Display, Formatter, Result};
 
-pub struct AcidData {
+pub struct Acid {
 	three_letter: &'static str,
 	sc_mass: f32,
 	pk1: f32,
@@ -10,7 +12,7 @@ pub struct AcidData {
 	extco: Option<u32>,
 }
 
-impl AcidData {
+impl Acid {
 	const fn new(
 		three_letter: &'static str,
 		sc_mass: f32,
@@ -19,8 +21,8 @@ impl AcidData {
 		pk3: Option<f32>,
 		sc_hbob: f32,
 		extco: Option<u32>,
-	) -> AcidData {
-		AcidData {
+	) -> Self {
+		Self {
 			three_letter,
 			sc_mass,
 			pk1,
@@ -32,8 +34,8 @@ impl AcidData {
 	}
 }
 
-impl fmt::Display for AcidData {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl Display for Acid {
+	fn fmt(&self, f: &mut Formatter) -> Result {
 		write!(
 			f,
 			"{}, {:?}, {}, {}, {:?}, {}, {}",
@@ -45,8 +47,20 @@ impl fmt::Display for AcidData {
 macro_rules! acid_table {
 	( $( $id:ident, $three_letter:expr, $sc_mass:expr, $pk1:expr, $pk2:expr, $pk3:expr, $sc_hbob:expr, $extco:expr )* ) => {
 		$(
-			pub const $id: AcidData = AcidData::new($three_letter, $sc_mass, $pk1, $pk2, $pk3, $sc_hbob, $extco);
+			concat_idents!(name = $id, _char {
+				const name: char = to_char_array!(stringify!($id))[0];
+			});
+			pub const $id: Acid = Acid::new($three_letter, $sc_mass, $pk1, $pk2, $pk3, $sc_hbob, $extco);
 		)*
+
+		impl Acid {
+			pub const fn from_shorthand(code: char) -> Option<Acid> {
+				match code.to_ascii_uppercase() {
+					$(concat_idents!(name = $id , _char { name } ) => Some($id),)*
+					_ => None
+				}
+			}
+		}
 	};
 }
 
