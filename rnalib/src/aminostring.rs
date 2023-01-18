@@ -42,7 +42,7 @@ impl AminoString {
 			source.remove(0);
 		}
 
-		res
+		return res;
 	}
 
 	pub fn get_proteins(&self) -> Vec<Protein> {
@@ -53,14 +53,11 @@ impl AminoString {
 		for codon in &self.codons {
 			let acid = codon.get_acid();
 
-			if acid == Codon::STOP {
-				if protein {
-					let mut new = Vec::new();
-					std::mem::swap(&mut current, &mut new);
-					res.push(Protein::from(new));
-				}
+			if acid == Codon::STOP && protein {
+				let mut new_codon = Vec::new();
+				std::mem::swap(&mut current, &mut new_codon);
+				res.push(Protein::from(new_codon));
 			}
-
 			if protein {
 				current.push(codon.clone());
 			}
@@ -69,23 +66,30 @@ impl AminoString {
 				protein = true;
 			}
 		}
-
-		res
+		return res;
 	}
 }
 
 impl Display for AminoString {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		let mut string = String::new();
-		string.push('[');
-		for i in &self.codons {
-			string.push(i.get_acid());
-			string.push(',');
-			string.push(' ');
-		}
-		string.pop();
-		string.pop();
-		string.push(']');
+		let codons_length = self.codons.len();
+
+		//sprawdzenie czy kodon ma zerową długość, jezeli tak nie ma sensu go wypisywać
+		if codons_length == 0 {
+			println!("Nie udało się stworzyć zadnego aminokwasu :(");
+		} else {
+			string.push('[');
+			for i in &self.codons {
+				string.push(i.get_acid());
+				string.push(',');
+				string.push(' ');
+			}
+			string.pop();
+			string.pop();
+			string.push(']');
+		};
+
 		f.write_str(&string)
 	}
 }
