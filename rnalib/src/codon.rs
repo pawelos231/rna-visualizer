@@ -1,6 +1,6 @@
 use std::fmt::{Display, Write};
 
-use crate::Nucleotide;
+use crate::{Acid, Nucleotide};
 
 #[derive(Clone)]
 pub struct Codon {
@@ -17,7 +17,11 @@ impl Codon {
 		}
 	}
 
-	pub fn get_acid(&self) -> char {
+	pub fn get_acid(&self) -> Acid {
+		Acid::from_shorthand(self.get_acid_shorthand()).unwrap()
+	}
+
+	pub fn get_acid_shorthand(&self) -> char {
 		use Nucleotide::*;
 		match self.nucleotides {
 			(U, U, U | C) => 'F',
@@ -54,6 +58,6 @@ impl Codon {
 
 impl Display for Codon {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_char(self.get_acid())
+		f.write_char(self.get_acid_shorthand())
 	}
 }

@@ -4,6 +4,7 @@ mod codon;
 mod nucleotide;
 mod protein;
 
+pub use acid::*;
 pub use aminostring::*;
 pub use codon::*;
 pub use nucleotide::*;

@@ -7,7 +7,7 @@ mod assets;
 
 pub fn make_vis(protein: &Protein) -> Result<(), ()> {
 	let codons = protein.get_codons();
-	let acids = codons.iter().map(|x| x.get_acid());
+	let acids = codons.iter().map(|x| x.get_acid_shorthand());
 
 	let mut map = Pixmap::new(1000, 1000).ok_or(())?;
 

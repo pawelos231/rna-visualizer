@@ -55,7 +55,7 @@ impl AminoString {
 		let mut current = Vec::new();
 		let mut protein = false;
 		for codon in &self.codons {
-			let acid = codon.get_acid();
+			let acid = codon.get_acid_shorthand();
 
 			if acid == Codon::STOP && protein {
 				let mut new_codon = Vec::new();
@@ -78,7 +78,11 @@ impl AminoString {
 
 impl Display for AminoString {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		let codons = self.codons.iter().map(|x| x.get_acid()).join(", ");
+		let codons = self
+			.codons
+			.iter()
+			.map(|x| x.get_acid_shorthand())
+			.join(", ");
 		f.write_str(&format!("[{codons}]"))
 	}
 }
