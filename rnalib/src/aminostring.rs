@@ -76,10 +76,10 @@ impl Display for AminoString {
 		let codons_length = self.codons.len();
 
 		//sprawdzenie czy kodon ma zerową długość, jezeli tak nie ma sensu go wypisywać
+		string.push('[');
 		if codons_length == 0 {
 			println!("Nie udało się stworzyć zadnego aminokwasu :(");
 		} else {
-			string.push('[');
 			for i in &self.codons {
 				string.push(i.get_acid());
 				string.push(',');
@@ -87,9 +87,8 @@ impl Display for AminoString {
 			}
 			string.pop();
 			string.pop();
-			string.push(']');
 		};
-
+		string.push(']');
 		f.write_str(&string)
 	}
 }
