@@ -25,7 +25,7 @@ impl AminoString {
 		let mut source = source.replace(" ", "");
 		let mut res = Vec::new();
 
-		for _ in 0..3 {
+		for _ in 0..3.min(source.len()) {
 			let chars = source.chars().collect::<Vec<_>>();
 			res.push(AminoString::from(
 				chars
@@ -57,7 +57,9 @@ impl AminoString {
 				let mut new_codon = Vec::new();
 				std::mem::swap(&mut current, &mut new_codon);
 				res.push(Protein::from(new_codon));
+				protein = false;
 			}
+
 			if protein {
 				current.push(codon.clone());
 			}
@@ -72,23 +74,7 @@ impl AminoString {
 
 impl Display for AminoString {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		let mut string = String::new();
-		let codons_length = self.codons.len();
-
-		//sprawdzenie czy kodon ma zerową długość, jezeli tak nie ma sensu go wypisywać
-		string.push('[');
-		if codons_length == 0 {
-			println!("Nie udało się stworzyć zadnego aminokwasu :(");
-		} else {
-			for i in &self.codons {
-				string.push(i.get_acid());
-				string.push(',');
-				string.push(' ');
-			}
-			string.pop();
-			string.pop();
-		};
-		string.push(']');
-		f.write_str(&string)
+		let codons = self.codons.iter().map(|x| x.get_acid()).join(", ");
+		f.write_str(&format!("[{codons}]"))
 	}
 }

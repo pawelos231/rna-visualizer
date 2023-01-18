@@ -9,14 +9,9 @@ fn main() {
 
 	let amino_strings = AminoString::parse(&buffer);
 	for amino in amino_strings {
-		println!("{amino}");
-		let vector_of_proteins = amino.get_proteins();
-		if vector_of_proteins.len() == 0 {
-			println!("[] - Nie udało się znaleźć zadnych białek :(")
-		};
-		for protein in vector_of_proteins {
-			println!("{protein}");
-		}
+		let proteins = amino.get_proteins();
+		println!("{amino}, {} protein(s)", proteins.len());
+		proteins.iter().for_each(|x| println!("• {x}"));
 		println!()
 	}
 }
