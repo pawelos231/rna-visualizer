@@ -45,6 +45,10 @@ impl AminoString {
 		return res;
 	}
 
+	pub fn get_codons(&self) -> &Vec<Codon> {
+		&self.codons
+	}
+
 	pub fn get_proteins(&self) -> Vec<Protein> {
 		let mut res = Vec::new();
 

@@ -1,10 +1,14 @@
 [package]
-name = "app"
+name = "rnavis"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rnalib = { path = "../rnalib" }
-rnavis = { path = "../rnavis" }
+resvg = "0.28.0"
+tiny-skia = "0.8.2"
+usvg = "0.28.0"
+const_format = "0.2.30"
+concat-idents = "1.1.4"
+rnalib = { path="../rnalib" }
