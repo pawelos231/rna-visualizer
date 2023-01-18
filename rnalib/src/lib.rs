@@ -1,3 +1,4 @@
+mod acid;
 mod aminostring;
 mod codon;
 mod nucleotide;
