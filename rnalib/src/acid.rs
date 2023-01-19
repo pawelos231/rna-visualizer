@@ -3,13 +3,13 @@ use const_str::*;
 use std::fmt::{Display, Formatter, Result};
 
 pub struct Acid {
-	three_letter: &'static str,
-	sc_mass: f32,
-	pk1: f32,
-	pk2: f32,
-	pk3: Option<f32>,
-	sc_hbob: f32,
-	extco: Option<u32>,
+	pub three_letter: &'static str,
+	pub sc_mass: f32,
+	pub pk1: f32,
+	pub pk2: f32,
+	pub pk3: Option<f32>,
+	pub sc_hbob: f32,
+	pub extco: Option<u32>,
 }
 
 impl Acid {
@@ -86,3 +86,15 @@ acid_table!(
 	W,	"Trp",	130.0655,	2.46,	9.410,	None,			-2.09,	Some(5500)
 	V,	"Lys",	43.05460,	2.39,	9.740,	None,			-0.46,	None
 );
+
+//helper function to read properties
+/*
+impl Acid {
+	pub fn print_acid(acid_id: char) {
+		match Acid::from_shorthand(acid_id) {
+			Some(x) => println!("Result: {x}"),
+			None => println!("Nie znaleziono!"),
+		};
+	}
+}
+*/

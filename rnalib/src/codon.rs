@@ -18,7 +18,7 @@ impl Codon {
 	}
 
 	pub fn get_acid(&self) -> Acid {
-		Acid::from_shorthand(self.get_acid_shorthand()).unwrap()
+		return Acid::from_shorthand(self.get_acid_shorthand()).unwrap();
 	}
 
 	pub fn get_acid_shorthand(&self) -> char {

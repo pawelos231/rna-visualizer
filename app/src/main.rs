@@ -1,5 +1,4 @@
 use rnalib::AminoString;
-
 fn main() {
 	let mut buffer = String::new();
 	std::io::stdin()
