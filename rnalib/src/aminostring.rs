@@ -48,26 +48,17 @@ impl AminoString {
 		&self.codons
 	}
 
-	pub fn calculate_mass(&self) -> f32 {
-		//The mass or formula weight is the sum of monoisotopic masses of all amino acid residues in the peptide. This is calculated by adding the atomic masses of all side-chain atoms to the mass of all backbone atoms plus the mass of water.
+	pub fn get_mass(&self) -> f32 {
+		let codon_len = self.codons.len() as f32;
+		let sum = crate::ALPHA_MASS * codon_len + crate::H2_MASS;
 
-		const ALPHA_MASS: f32 = 56.0136;
-		const H2_MASS: f32 = 18.0105;
-		let codon_len = *&self.codons.len() as f32;
-		let mut sum = ALPHA_MASS * codon_len + H2_MASS;
-		for codon in &self.codons {
-			let acid_data = Codon::get_acid(&codon);
-			match acid_data {
-				Some(x) => sum += x.sc_mass,
-				None => {
-					println!("MASA: {}", sum);
-					return sum;
-				}
-			}
-		}
-		println!("MASA: {}", sum);
-		return sum;
+		sum + self
+			.codons
+			.iter()
+			.map(|x| x.get_acid().map(|x| x.sc_mass).unwrap_or(0f32))
+			.sum::<f32>()
 	}
+
 	pub fn net_charge(&self) -> f32 {
 		let mut c = 0.0;
 		for codon in &self.codons {
@@ -75,32 +66,29 @@ impl AminoString {
 		}
 		return 0.5;
 	}
-	pub fn add_sigma(hydrophobicity: f32) -> String {
-		let mut new_val: String = "+".to_owned();
-		let stringed_hydro = hydrophobicity.to_string();
-		if (hydrophobicity > 0.0) {
-			new_val.push_str(&hydrophobicity.to_string()[..]);
-			return new_val;
-		} else {
-			return stringed_hydro;
-		}
+
+	pub fn add_signum(hydrophobicity: f32) -> String {
+		format!("{:>+}", hydrophobicity)
 	}
+
 	pub fn calch_phob(&self) -> String {
 		let mut hydrophobicity = 7.9;
+
 		for codon in &self.codons {
-			let acid_data = Codon::get_acid(&codon);
-			match acid_data {
+			let acid = codon.get_acid();
+			match acid {
 				Some(x) => hydrophobicity += x.sc_hbob,
-				None => return AminoString::add_sigma(hydrophobicity),
+				None => return AminoString::add_signum(hydrophobicity),
 			}
 		}
 
-		let mut return_val = AminoString::add_sigma(hydrophobicity);
-		return_val.push_str("Kcal * mol do potęgi -1");
+		let mut return_val = AminoString::add_signum(hydrophobicity);
+		return_val.push_str("Kcal * mol⁻¹");
 		println!("{}", return_val);
 		return return_val;
 	}
-	pub fn calculate_polarity(&self) -> f32 {
+
+	pub fn get_polarity(&self) -> f32 {
 		return 0.5;
 	}
 
