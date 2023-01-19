@@ -49,6 +49,8 @@ impl AminoString {
 	}
 
 	pub fn calculate_mass(&self) -> f32 {
+		//The mass or formula weight is the sum of monoisotopic masses of all amino acid residues in the peptide. This is calculated by adding the atomic masses of all side-chain atoms to the mass of all backbone atoms plus the mass of water.
+
 		let codon_len = *&self.codons.len() as f32;
 		const ALPHA_MASS: f32 = 56.0136;
 		const H2_MASS: f32 = 18.0105;
@@ -57,6 +59,7 @@ impl AminoString {
 			let acid_data = Codon::get_acid(&codon);
 			sum += acid_data.sc_mass;
 		}
+		println!("{}", sum);
 		return sum;
 	}
 	pub fn net_charge(&self) -> f32 {
@@ -65,6 +68,26 @@ impl AminoString {
 			let acid_data = Codon::get_acid(&codon);
 		}
 		return 0.5;
+	}
+	pub fn add_sigma(hydrophobicity: f32) -> String {
+		let mut new_val: String = "+".to_owned();
+		let stringed_hydro = hydrophobicity.to_string();
+		if (hydrophobicity > 0.0) {
+			new_val.push_str(&hydrophobicity.to_string()[..]);
+			return new_val;
+		} else {
+			return stringed_hydro;
+		}
+	}
+	pub fn calch_phob(&self) -> String {
+		let mut hydrophobicity = 7.9;
+		for codon in &self.codons {
+			let acid_data = Codon::get_acid(&codon);
+			hydrophobicity += acid_data.sc_hbob;
+		}
+		let mut return_val = AminoString::add_sigma(hydrophobicity);
+		return_val.push_str("Kcal * mol do potęgi -1");
+		return return_val;
 	}
 	pub fn calculate_polarity(&self) -> f32 {
 		return 0.5;
