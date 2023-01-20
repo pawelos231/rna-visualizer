@@ -13,7 +13,7 @@ pub struct Acid {
 }
 
 impl Acid {
-	const fn new(
+	pub const fn new(
 		three_letter: &'static str,
 		sc_mass: f32,
 		pk1: f32,
@@ -43,19 +43,6 @@ impl Display for Acid {
 		)
 	}
 }
-impl Default for Acid {
-	fn default() -> Self {
-		Acid {
-			three_letter: "Nieprawidłowy",
-			sc_mass: 0.0,
-			pk1: 0.0,
-			pk2: 0.0,
-			pk3: Some(0.0),
-			sc_hbob: 0.0,
-			extco: Some(0),
-		}
-	}
-}
 
 macro_rules! acid_table {
 	( $( $id:ident, $three_letter:expr, $sc_mass:expr, $pk1:expr, $pk2:expr, $pk3:expr, $sc_hbob:expr, $extco:expr )* ) => {
@@ -63,13 +50,13 @@ macro_rules! acid_table {
 			concat_idents!(name = $id, _char {
 				const name: char = to_char_array!(stringify!($id))[0];
 			});
-			pub const $id: Acid = Acid::new($three_letter, $sc_mass, $pk1, $pk2, $pk3, $sc_hbob, $extco);
 		)*
 
 		impl Acid {
+			$(pub const $id: Acid = Acid::new($three_letter, $sc_mass, $pk1, $pk2, $pk3, $sc_hbob, $extco);)*
 			pub const fn from_shorthand(code: char) -> Option<Acid> {
 				match code.to_ascii_uppercase() {
-					$(concat_idents!(name = $id , _char { name } ) => Some($id),)*
+					$(concat_idents!(name = $id , _char { name } ) => Some(Self::$id),)*
 					_ => None
 				}
 			}
@@ -99,15 +86,3 @@ acid_table!(
 	W,	"Trp",	130.0655,	2.46,	9.410,	None,			-2.09,	Some(5500)
 	V,	"Lys",	43.05460,	2.39,	9.740,	None,			-0.46,	None
 );
-
-//helper function to read properties
-/*
-impl Acid {
-	pub fn print_acid(acid_id: char) {
-		match Acid::from_shorthand(acid_id) {
-			Some(x) => println!("Result: {x}"),
-			None => println!("Nie znaleziono!"),
-		};
-	}
-}
-*/

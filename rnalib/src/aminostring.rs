@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::{Acid, Bases, Codon, Nucleotide, Protein};
+use crate::{Bases, Codon, Nucleotide, Protein};
 use itertools::Itertools;
 
 pub struct AminoString {
@@ -57,7 +57,6 @@ impl AminoString {
 				.iter()
 				.map(|x| x.get_acid().map(|x| x.sc_mass).unwrap_or(0f32))
 				.sum::<f32>();
-		//println!("{}", final_mass);
 		final_mass
 	}
 
@@ -65,6 +64,7 @@ impl AminoString {
 		let netVal = Bases::init_bases().K;
 		println!("{}", netVal)
 	}
+
 	pub fn net_charge(&self) -> f32 {
 		let mut c = 0.0;
 		for codon in &self.codons {
@@ -74,7 +74,6 @@ impl AminoString {
 	}
 
 	pub fn add_signum(hydrophobicity: f32) -> String {
-		//moze wygląda "gorzej" ale przynajmniej jest czytelne xD
 		if hydrophobicity > 0.0 {
 			format!("+{}", hydrophobicity)
 		} else {
@@ -93,7 +92,6 @@ impl AminoString {
 
 		let mut return_val = AminoString::add_signum(final_hydrophobicity);
 		return_val.push_str("Kcal * mol⁻¹");
-		//println!("{}", return_val);
 		return_val
 	}
 

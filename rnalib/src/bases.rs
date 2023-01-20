@@ -6,13 +6,14 @@ pub struct Bases {
 	pub R: Acid,
 	pub H: Acid,
 }
+
 impl Bases {
 	pub fn init_bases() -> Self {
 		Self {
 			Nterm: 0,
-			K: Acid::from_shorthand('K').unwrap(),
-			R: Acid::from_shorthand('R').unwrap(),
-			H: Acid::from_shorthand('H').unwrap(),
+			K: Acid::K,
+			R: Acid::R,
+			H: Acid::H,
 		}
 	}
 }
