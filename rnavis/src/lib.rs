@@ -1,7 +1,7 @@
 use resvg::*;
 use rnalib::Protein;
 use tiny_skia::*;
-use usvg::FitTo;
+use usvg::{FitTo, Options, Tree};
 
 mod assets;
 
@@ -14,22 +14,29 @@ pub fn make_vis(protein: &Protein) -> Result<(), ()> {
 	let mut start_x = 0f32;
 	let start_y = map.height() as f32 / 2.0;
 
-	let base = assets::get_base();
+	let options = Options::default();
+
+	let base = Tree::from_str(assets::BASE, &options).unwrap();
 	let base_height = base.size.height() as f32;
 	let base_width = base.size.width() as f32;
 
-	// for acid in acids {
-	// 	let characteristic =
-	// 		assets::get_characteristic_structure_svg(acid).expect("kwas sie wyjebał");
+	for acid in acids {
+		let svg_src = match assets::get_acid_svg_by_shorthand(acid) {
+			Some(src) => src,
+			None => panic!("Unsupported acid!"),
+		};
 
-	// 	let root = Transform::from_translate(start_x, start_y);
-	// 	resvg::render(&base, FitTo::Original, root, map.as_mut());
+		let characteristic =
+			Tree::from_str(svg_src, &options).expect(&format!("Invalid acid svg: {acid}"));
 
-	// 	let root = Transform::from_translate(start_x + 76.0, start_y + base_height - 10.0);
-	// 	resvg::render(&characteristic, FitTo::Original, root, map.as_mut());
+		let root = Transform::from_translate(start_x, start_y);
+		resvg::render(&base, FitTo::Original, root, map.as_mut());
 
-	// 	start_x += base_width;
-	// }
+		let root = Transform::from_translate(start_x + 76.0, start_y + base_height - 10.0);
+		resvg::render(&characteristic, FitTo::Original, root, map.as_mut());
+
+		start_x += base_width;
+	}
 
 	map.save_png("test.png").expect("zapis sie wyjebał");
 

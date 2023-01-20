@@ -1,10 +1,21 @@
-use usvg::{Options, Tree};
+use concat_idents::concat_idents;
+use const_str::to_char_array;
 
 macro_rules! include_many {
 	( $( $name:ident ),* ) => {
 		$(
+			concat_idents!(name = $name, _char {
+				const name: char = to_char_array!(stringify!($id))[0];
+			});
 			pub const $name: &str = include_str!(concat!("./svg/", stringify!($name), ".svg"));
 		)*
+
+		pub fn get_acid_svg_by_shorthand(shorthand: char) -> Option<&'static str> {
+			match shorthand.to_ascii_uppercase() {
+				$(concat_idents!(name = $name , _char { name } ) => Some($name),)*
+				_ => None
+			}
+		}
 	};
 }
 
@@ -20,18 +31,3 @@ include_many!(
 	Q, R, S, T,
 	U, V, W, Y
 );
-
-// pub const BASE: &str = include_str!("./svg/base.svg");
-// pub const R: &str = include_str!("./svg/R.svg");
-
-pub fn get_base() -> Tree {
-	Tree::from_str(BASE, &Options::default()).unwrap()
-}
-
-/*pub fn get_characteristic_structure_svg(key: char) -> Option<Tree> {
-	match key.to_ascii_uppercase() {
-		'R' => Some(),
-		_ => None,
-	}
-	.and_then(|x| Some(Tree::from_str(x, &Options::default()).unwrap()))
-}*/
