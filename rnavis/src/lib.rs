@@ -18,18 +18,18 @@ pub fn make_vis(protein: &Protein) -> Result<(), ()> {
 	let base_height = base.size.height() as f32;
 	let base_width = base.size.width() as f32;
 
-	for acid in acids {
-		let characteristic =
-			assets::get_characteristic_structure_svg(acid).expect("kwas sie wyjebał");
+	// for acid in acids {
+	// 	let characteristic =
+	// 		assets::get_characteristic_structure_svg(acid).expect("kwas sie wyjebał");
 
-		let root = Transform::from_translate(start_x, start_y);
-		resvg::render(&base, FitTo::Original, root, map.as_mut());
+	// 	let root = Transform::from_translate(start_x, start_y);
+	// 	resvg::render(&base, FitTo::Original, root, map.as_mut());
 
-		let root = Transform::from_translate(start_x + 76.0, start_y + base_height - 10.0);
-		resvg::render(&characteristic, FitTo::Original, root, map.as_mut());
+	// 	let root = Transform::from_translate(start_x + 76.0, start_y + base_height - 10.0);
+	// 	resvg::render(&characteristic, FitTo::Original, root, map.as_mut());
 
-		start_x += base_width;
-	}
+	// 	start_x += base_width;
+	// }
 
 	map.save_png("test.png").expect("zapis sie wyjebał");
 
