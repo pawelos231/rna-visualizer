@@ -47,7 +47,7 @@ impl Display for Acid {
 macro_rules! acid_table {
 	( $( $id:ident, $three_letter:expr, $sc_mass:expr, $pk1:expr, $pk2:expr, $pk3:expr, $sc_hbob:expr, $extco:expr )* ) => {
 		$(
-			concat_idents!(name = $id, _char {
+			concat_idents!(name = $id, _CHAR {
 				const name: char = to_char_array!(stringify!($id))[0];
 			});
 		)*
@@ -56,7 +56,7 @@ macro_rules! acid_table {
 			$(pub const $id: Acid = Acid::new($three_letter, $sc_mass, $pk1, $pk2, $pk3, $sc_hbob, $extco);)*
 			pub const fn from_shorthand(code: char) -> Option<Acid> {
 				match code.to_ascii_uppercase() {
-					$(concat_idents!(name = $id , _char { name } ) => Some(Self::$id),)*
+					$(concat_idents!(name = $id , _CHAR { name } ) => Some(Self::$id),)*
 					_ => None
 				}
 			}

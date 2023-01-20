@@ -26,8 +26,8 @@ pub fn make_vis(protein: &Protein) -> Result<(), ()> {
 			None => panic!("Unsupported acid!"),
 		};
 
-		let characteristic =
-			Tree::from_str(svg_src, &options).expect(&format!("Invalid acid svg: {acid}"));
+		let characteristic = Tree::from_str(svg_src, &options)
+			.unwrap_or_else(|_| panic!("Invalid acid svg: {acid}"));
 
 		let root = Transform::from_translate(start_x, start_y);
 		resvg::render(&base, FitTo::Original, root, map.as_mut());

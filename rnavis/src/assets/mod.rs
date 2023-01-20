@@ -4,7 +4,7 @@ use const_str::to_char_array;
 macro_rules! include_many {
 	( $( $name:ident ),* ) => {
 		$(
-			concat_idents!(name = $name, _char {
+			concat_idents!(name = $name, _CHAR {
 				const name: char = to_char_array!(stringify!($id))[0];
 			});
 			pub const $name: &str = include_str!(concat!("./svg/", stringify!($name), ".svg"));
@@ -12,7 +12,7 @@ macro_rules! include_many {
 
 		pub fn get_acid_svg_by_shorthand(shorthand: char) -> Option<&'static str> {
 			match shorthand.to_ascii_uppercase() {
-				$(concat_idents!(name = $name , _char { name } ) => Some($name),)*
+				$(concat_idents!(name = $name , _CHAR { name } ) => Some($name),)*
 				_ => None
 			}
 		}

@@ -21,7 +21,7 @@ impl AminoString {
 	}
 
 	pub fn parse(source: &str) -> Vec<Self> {
-		let mut source = source.replace(" ", "");
+		let mut source = source.replace(' ', "");
 		let mut res = Vec::new();
 		for _ in 0..3.min(source.len()) {
 			let chars = source.chars().collect::<Vec<_>>();
@@ -32,7 +32,7 @@ impl AminoString {
 						x.iter()
 							.map(|x| Nucleotide::parse(*x).unwrap())
 							.next_tuple::<(_, _, _)>()
-							.and_then(|x| Some(Codon::new(x.0, x.1, x.2)))
+							.map(|x| Codon::new(x.0, x.1, x.2))
 							.unwrap()
 					})
 					.collect::<Vec<_>>(),
@@ -40,7 +40,7 @@ impl AminoString {
 			source.remove(0);
 		}
 
-		return res;
+		res
 	}
 
 	pub fn get_codons(&self) -> &Vec<Codon> {
@@ -66,11 +66,11 @@ impl AminoString {
 	}
 
 	pub fn net_charge(&self) -> f32 {
-		let mut c = 0.0;
+		let _c = 0.0;
 		for codon in &self.codons {
-			let acid_data = codon.get_acid();
+			let _acid_data = codon.get_acid();
 		}
-		return 0.5;
+		0.5
 	}
 
 	pub fn add_signum(hydrophobicity: f32) -> String {
@@ -96,7 +96,7 @@ impl AminoString {
 	}
 
 	pub fn get_polarity(&self) -> f32 {
-		return 0.5;
+		0.5
 	}
 
 	pub fn get_proteins(&self) -> Vec<Protein> {
@@ -120,7 +120,7 @@ impl AminoString {
 				protein = true;
 			}
 		}
-		return result;
+		result
 	}
 }
 
