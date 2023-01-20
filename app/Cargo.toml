@@ -8,3 +8,6 @@ edition = "2021"
 [dependencies]
 rnalib = { path = "../rnalib" }
 rnavis = { path = "../rnavis" }
+
+[profile.release]
+debug = true
