@@ -43,6 +43,19 @@ impl Display for Acid {
 		)
 	}
 }
+impl Default for Acid {
+	fn default() -> Self {
+		Acid {
+			three_letter: "Nieprawidłowy",
+			sc_mass: 0.0,
+			pk1: 0.0,
+			pk2: 0.0,
+			pk3: Some(0.0),
+			sc_hbob: 0.0,
+			extco: Some(0),
+		}
+	}
+}
 
 macro_rules! acid_table {
 	( $( $id:ident, $three_letter:expr, $sc_mass:expr, $pk1:expr, $pk2:expr, $pk3:expr, $sc_hbob:expr, $extco:expr )* ) => {

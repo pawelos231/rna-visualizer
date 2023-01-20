@@ -1,8 +1,7 @@
 use std::fmt::Display;
 
+use crate::{Acid, Bases, Codon, Nucleotide, Protein};
 use itertools::Itertools;
-
-use crate::{Codon, Nucleotide, Protein};
 
 pub struct AminoString {
 	codons: Vec<Codon>,
@@ -52,40 +51,50 @@ impl AminoString {
 		let codon_len = self.codons.len() as f32;
 		let sum = crate::ALPHA_MASS * codon_len + crate::H2_MASS;
 
-		sum + self
-			.codons
-			.iter()
-			.map(|x| x.get_acid().map(|x| x.sc_mass).unwrap_or(0f32))
-			.sum::<f32>()
+		let final_mass: f32 = sum
+			+ self
+				.codons
+				.iter()
+				.map(|x| x.get_acid().map(|x| x.sc_mass).unwrap_or(0f32))
+				.sum::<f32>();
+		//println!("{}", final_mass);
+		final_mass
 	}
 
+	pub fn get_isoletric_point(&self) {
+		let netVal = Bases::init_bases().K;
+		println!("{}", netVal)
+	}
 	pub fn net_charge(&self) -> f32 {
 		let mut c = 0.0;
 		for codon in &self.codons {
-			let acid_data = Codon::get_acid(&codon);
+			let acid_data = codon.get_acid();
 		}
 		return 0.5;
 	}
 
 	pub fn add_signum(hydrophobicity: f32) -> String {
-		format!("{:>+}", hydrophobicity)
+		//moze wygląda "gorzej" ale przynajmniej jest czytelne xD
+		if hydrophobicity > 0.0 {
+			format!("+{}", hydrophobicity)
+		} else {
+			hydrophobicity.to_string()
+		}
 	}
 
-	pub fn calch_phob(&self) -> String {
-		let mut hydrophobicity = 7.9;
+	pub fn get_phob(&self) -> String {
+		let hydrophobicity = 7.9;
+		let final_hydrophobicity: f32 = hydrophobicity
+			+ self
+				.codons
+				.iter()
+				.map(|x| x.get_acid().map(|x| x.sc_hbob).unwrap_or(0f32))
+				.sum::<f32>();
 
-		for codon in &self.codons {
-			let acid = codon.get_acid();
-			match acid {
-				Some(x) => hydrophobicity += x.sc_hbob,
-				None => return AminoString::add_signum(hydrophobicity),
-			}
-		}
-
-		let mut return_val = AminoString::add_signum(hydrophobicity);
+		let mut return_val = AminoString::add_signum(final_hydrophobicity);
 		return_val.push_str("Kcal * mol⁻¹");
-		println!("{}", return_val);
-		return return_val;
+		//println!("{}", return_val);
+		return_val
 	}
 
 	pub fn get_polarity(&self) -> f32 {
@@ -106,11 +115,9 @@ impl AminoString {
 				result.push(Protein::from(new_codon));
 				protein = false;
 			}
-
 			if protein {
 				current.push(codon.clone());
 			}
-
 			if acid == Codon::START {
 				protein = true;
 			}
