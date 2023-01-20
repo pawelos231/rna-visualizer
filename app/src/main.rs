@@ -9,7 +9,7 @@ fn main() {
 	let amino_strings = AminoString::parse(&buffer);
 	for amino in amino_strings {
 		let proteins = amino.get_proteins();
-		// amino.get_mass();
+		amino.get_isoletric_point();
 		println!("{amino}, {} protein(s)", proteins.len());
 		proteins.iter().for_each(|x| println!("• {x}"));
 		println!();
