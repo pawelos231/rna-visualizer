@@ -3,15 +3,12 @@ use std::fmt::Display;
 use crate::{Bases, Codon, Nucleotide, Protein};
 use itertools::Itertools;
 
+#[derive(Default)]
 pub struct AminoString {
 	codons: Vec<Codon>,
 }
 
 impl AminoString {
-	pub fn new() -> Self {
-		Self { codons: Vec::new() }
-	}
-
 	pub fn from(codons: Vec<Codon>) -> Self {
 		Self { codons }
 	}
@@ -61,8 +58,8 @@ impl AminoString {
 	}
 
 	pub fn get_isoletric_point(&self) {
-		let netVal = Bases::init_bases().K;
-		println!("{}", netVal)
+		let net_val = Bases::init_bases().k;
+		println!("{}", net_val)
 	}
 
 	pub fn net_charge(&self) -> f32 {

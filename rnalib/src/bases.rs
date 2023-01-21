@@ -1,19 +1,19 @@
 use crate::Acid;
 
 pub struct Bases {
-	pub Nterm: u32,
-	pub K: Acid,
-	pub R: Acid,
-	pub H: Acid,
+	pub n_term: u32,
+	pub k: Acid,
+	pub r: Acid,
+	pub h: Acid,
 }
 
 impl Bases {
 	pub fn init_bases() -> Self {
 		Self {
-			Nterm: 0,
-			K: Acid::K,
-			R: Acid::R,
-			H: Acid::H,
+			n_term: 0,
+			k: Acid::K,
+			r: Acid::R,
+			h: Acid::H,
 		}
 	}
 }

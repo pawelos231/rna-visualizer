@@ -1,21 +1,29 @@
 use concat_idents::concat_idents;
 use const_str::to_char_array;
 
-macro_rules! include_many {
+macro_rules! include_many_lookup {
 	( $( $name:ident ),* ) => {
+		include_many!($($name),*);
 		$(
-			concat_idents!(name = $name, _CHAR {
-				const name: char = to_char_array!(stringify!($id))[0];
+			concat_idents!(id = $name, _CHAR {
+				const id: char = to_char_array!(stringify!($name))[0];
 			});
-			pub const $name: &str = include_str!(concat!("./svg/", stringify!($name), ".svg"));
 		)*
 
 		pub fn get_acid_svg_by_shorthand(shorthand: char) -> Option<&'static str> {
 			match shorthand.to_ascii_uppercase() {
-				$(concat_idents!(name = $name , _CHAR { name } ) => Some($name),)*
-				_ => None
+				$(concat_idents!(id = $name , _CHAR { id } ) => Some($name),)*
+				_ => None,
 			}
 		}
+	};
+}
+
+macro_rules! include_many {
+	( $( $name:ident ),* ) => {
+		$(
+			pub const $name: &str = include_str!(concat!("./svg/", stringify!($name), ".svg"));
+		)*
 	};
 }
 
@@ -24,7 +32,11 @@ include_many!(
 	BASE,
 	BASE_LINK,
 	BASE_P_LINK,
-	BASE_P,
+	BASE_P
+);
+
+#[rustfmt::skip]
+include_many_lookup!(
 	A, C, D, E,
 	F, H, I, K, 
 	L, M, N, P,
