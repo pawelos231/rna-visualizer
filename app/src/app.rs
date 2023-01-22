@@ -43,7 +43,7 @@ impl App {
 }
 
 impl eframe::App for App {
-	fn update(&mut self, ctx: &Context, frame: &mut Frame) {
+	fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
 		TopBottomPanel::top("TOP").show(ctx, |ui| {
 			ui.horizontal(|ui| {
 				ui.label("Ciąg RNA");

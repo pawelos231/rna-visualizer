@@ -105,14 +105,18 @@ impl AminoString {
 			let acid = codon.get_acid_shorthand();
 
 			if acid == Codon::STOP && protein {
-				let mut new_codon = Vec::new();
-				std::mem::swap(&mut current, &mut new_codon);
-				result.push(Protein::from(new_codon));
+				if current.len() != 0 {
+					let mut new_codon = Vec::new();
+					std::mem::swap(&mut current, &mut new_codon);
+					result.push(Protein::from(new_codon));
+				}
 				protein = false;
 			}
+
 			if protein {
 				current.push(codon.clone());
 			}
+
 			if acid == Codon::START {
 				protein = true;
 			}
