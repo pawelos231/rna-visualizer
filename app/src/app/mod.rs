@@ -1,18 +1,17 @@
 use crate::ProteinMap;
 use eframe::Frame;
-use egui::{Button, CentralPanel, Context, ScrollArea, SidePanel, TopBottomPanel, Window};
-use native_dialog::{FileDialog, MessageDialog, MessageType};
+use egui::{Button, CentralPanel, Context, ScrollArea, SidePanel, TopBottomPanel};
 use rnalib::AminoString;
+
+mod import_window;
+use import_window::ImportWindow;
 
 #[derive(Default)]
 pub struct App {
 	rna: String,
 	proteins: ProteinMap,
 	flag: bool,
-	separator: String,
-	delete_wrong_chars: bool,
-	import_type: bool,
-	path: String,
+	import_window: ImportWindow,
 }
 
 impl App {
@@ -24,6 +23,10 @@ impl App {
 
 impl eframe::App for App {
 	fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
+		if self.import_window.visible && self.import_window.show(ctx) {
+			self.rna = self.import_window.generate_output();
+		}
+
 		TopBottomPanel::top("TOP").show(ctx, |ui| {
 			ui.horizontal(|ui| {
 				ui.label("Ciąg RNA:");
@@ -41,6 +44,9 @@ impl eframe::App for App {
 				if ui.button("Wytnij niepoprawne znaki").clicked() {
 					self.rna
 						.retain(|x| "AGCUT ".contains(x.to_ascii_uppercase()));
+				}
+				if ui.button("Zaawansowany import...").clicked() {
+					self.import_window.visible = true;
 				}
 			});
 		});
@@ -60,45 +66,6 @@ impl eframe::App for App {
 				});
 			});
 
-		Window::new("Import danych")
-			.resizable(true)
-			.show(ctx, |ui| {
-				ui.label("Źródło");
-				ui.horizontal(|ui| {
-					ui.radio_value(&mut self.import_type, true, "Plik");
-					ui.radio_value(&mut self.import_type, false, "Z tekstu");
-				});
-				if self.import_type {
-					ui.horizontal(|ui| {
-						ui.label("wybierz plik: ");
-						ui.text_edit_singleline::<String>(&mut self.path);
-						if ui.button("Wczytaj plik").clicked() {
-							let path = FileDialog::new()
-								.set_location("~/Desktop")
-								.add_filter("Text file", &["txt"])
-								.add_filter("all files", &["*"])
-								.show_open_single_file()
-								.unwrap();
-							self.path = match path {
-								Some(path) => path.to_str().unwrap().to_owned(),
-								None => return,
-							};
-						};
-					});
-				} else {
-					ui.horizontal(|ui| {
-						ui.label("Wpisz: ");
-					});
-					ui.text_edit_multiline::<String>(&mut self.rna);
-				};
-				ui.separator();
-				ui.horizontal(|ui| {
-					ui.label("Separator: ");
-					ui.text_edit_singleline::<String>(&mut self.separator);
-				});
-				ui.checkbox(&mut self.delete_wrong_chars, "Usuń niepoprawne znaki");
-			});
-
-		CentralPanel::default().show(ctx, |ui| {});
+		CentralPanel::default().show(ctx, |_| {});
 	}
 }
