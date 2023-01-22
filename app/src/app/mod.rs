@@ -1,10 +1,16 @@
 use crate::ProteinMap;
 use eframe::Frame;
-use egui::{Button, CentralPanel, Context, ScrollArea, SidePanel, TopBottomPanel};
+use egui::{CentralPanel, Context, SidePanel, TopBottomPanel};
 use rnalib::AminoString;
 
 mod import_window;
 use import_window::ImportWindow;
+
+mod protein_selector;
+use protein_selector::ProteinSelector;
+
+mod fast_text_edit;
+use fast_text_edit::FastTextEdit;
 
 #[derive(Default)]
 pub struct App {
@@ -12,6 +18,7 @@ pub struct App {
 	proteins: ProteinMap,
 	flag: bool,
 	import_window: ImportWindow,
+	protein_selector: ProteinSelector,
 }
 
 impl App {
@@ -30,7 +37,7 @@ impl eframe::App for App {
 		TopBottomPanel::top("TOP").show(ctx, |ui| {
 			ui.horizontal(|ui| {
 				ui.label("Ciąg RNA:");
-				ui.text_edit_singleline::<String>(&mut self.rna);
+				FastTextEdit::singleline(ui, &mut self.rna);
 				if ui.button("Wczytaj").clicked() {
 					self.flag = true;
 					let mut proteins = Vec::new();
@@ -52,18 +59,9 @@ impl eframe::App for App {
 		});
 
 		SidePanel::left("left_panel")
-			.resizable(true)
-			.default_width(150.0)
-			.width_range(80.0..=200.0)
+			.min_width(300.0)
 			.show(ctx, |ui| {
-				ScrollArea::vertical().show(ui, |ui| {
-					if self.proteins.sorted_keys.len() as u32 == 0 && self.flag {
-						ui.add_sized([300., 30.], Button::new("Nie znaleziono zadnych białek"));
-					};
-					for protein in &self.proteins.sorted_keys {
-						ui.add_sized([300., 30.], Button::new(protein));
-					}
-				});
+				self.protein_selector.show(ui, &self.proteins);
 			});
 
 		CentralPanel::default().show(ctx, |_| {});

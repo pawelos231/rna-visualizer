@@ -13,8 +13,11 @@ impl ProteinMap {
 		let mut sorted_keys = Vec::new();
 
 		for protein in source {
-			sorted_keys.push(protein.to_string());
-			proteins.insert(protein.to_string(), protein);
+			let key = protein.to_string();
+			if !sorted_keys.contains(&key) {
+				proteins.insert(key.clone(), protein);
+				sorted_keys.push(key);
+			}
 		}
 
 		sorted_keys.sort_by_key(|a| a.to_string().len());

@@ -108,11 +108,20 @@ impl ImportWindow {
 		ui.label(RichText::new("Podgląd:").strong());
 		ui.horizontal(|ui| {
 			ui.centered_and_justified(|ui| {
-				ui.add_enabled_ui(false, |ui| {
-					ui.text_edit_multiline(&mut self.preview);
+				egui::ScrollArea::vertical().show(ui, |ui| {
+					ui.add_enabled_ui(false, |ui| {
+						ui.add(
+							egui::TextEdit::multiline(&mut self.preview)
+								.font(egui::TextStyle::Monospace)
+								.code_editor()
+								.desired_rows(4)
+								.lock_focus(true)
+								.desired_width(f32::INFINITY),
+						);
+					});
 				});
 				if ui.button("Odśwież").clicked() {
-					self.preview = self.generate_preview();
+					self.preview = self.generate_output();
 				}
 			});
 		});
@@ -121,13 +130,5 @@ impl ImportWindow {
 	fn show_import(&mut self, ui: &mut Ui) -> bool {
 		ui.separator();
 		ui.button("Importuj").clicked()
-	}
-
-	fn generate_preview(&mut self) -> String {
-		let mut preview = self.generate_output();
-		if preview.len() > 300 {
-			preview = format!("{}...", &preview[0..300]);
-		}
-		preview
 	}
 }
