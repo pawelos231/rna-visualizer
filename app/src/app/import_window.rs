@@ -44,7 +44,7 @@ impl ImportWindow {
 			return String::from("Invalid file path")
 		};
 
-		output = output.as_str().replace(&self.separator, "").to_owned();
+		output = output.as_str().replace(&self.separator, "");
 
 		if self.delete_wrong_chars {
 			output.retain(|x| "AGCUT ".contains(x.to_ascii_uppercase()));

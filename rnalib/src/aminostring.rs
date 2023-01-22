@@ -105,7 +105,7 @@ impl AminoString {
 			let acid = codon.get_acid_shorthand();
 
 			if acid == Codon::STOP && protein {
-				if current.len() != 0 {
+				if !current.is_empty() {
 					let mut new_codon = Vec::new();
 					std::mem::swap(&mut current, &mut new_codon);
 					result.push(Protein::from(new_codon));

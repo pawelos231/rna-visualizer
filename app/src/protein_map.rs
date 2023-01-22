@@ -17,7 +17,7 @@ impl ProteinMap {
 			proteins.insert(protein.to_string(), protein);
 		}
 
-		sorted_keys.sort_by(|a, b| a.to_string().len().cmp(&b.to_string().len()));
+		sorted_keys.sort_by_key(|a| a.to_string().len());
 
 		Self {
 			proteins,
