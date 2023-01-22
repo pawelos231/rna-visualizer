@@ -1,4 +1,4 @@
-use crate::{AminoString, Protein};
+use rnalib::Protein;
 use std::collections::HashMap;
 
 #[derive(Default)]

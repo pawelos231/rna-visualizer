@@ -1,12 +1,18 @@
+use crate::ProteinMap;
 use eframe::Frame;
-use egui::{Button, CentralPanel, Context, ScrollArea, SidePanel, TopBottomPanel};
-use rnalib::{AminoString, ProteinMap};
+use egui::{Button, CentralPanel, Context, ScrollArea, SidePanel, TopBottomPanel, Window};
+use native_dialog::{FileDialog, MessageDialog, MessageType};
+use rnalib::AminoString;
 
 #[derive(Default)]
 pub struct App {
 	rna: String,
 	proteins: ProteinMap,
 	flag: bool,
+	separator: String,
+	delete_wrong_chars: bool,
+	import_type: bool,
+	path: String,
 }
 
 impl App {
@@ -33,11 +39,8 @@ impl eframe::App for App {
 					self.proteins = ProteinMap::new(proteins);
 				};
 				if ui.button("Wytnij niepoprawne znaki").clicked() {
-					for character in self.rna.chars().find() {
-						if character.to_ascii_uppercase() != 'A' {
-							println!("sraka")
-						}
-					}
+					self.rna
+						.retain(|x| "AGCUT ".contains(x.to_ascii_uppercase()));
 				}
 			});
 		});
@@ -55,6 +58,45 @@ impl eframe::App for App {
 						ui.add_sized([300., 30.], Button::new(protein));
 					}
 				});
+			});
+
+		Window::new("Import danych")
+			.resizable(true)
+			.show(ctx, |ui| {
+				ui.label("Źródło");
+				ui.horizontal(|ui| {
+					ui.radio_value(&mut self.import_type, true, "Plik");
+					ui.radio_value(&mut self.import_type, false, "Z tekstu");
+				});
+				if self.import_type {
+					ui.horizontal(|ui| {
+						ui.label("wybierz plik: ");
+						ui.text_edit_singleline::<String>(&mut self.path);
+						if ui.button("Wczytaj plik").clicked() {
+							let path = FileDialog::new()
+								.set_location("~/Desktop")
+								.add_filter("Text file", &["txt"])
+								.add_filter("all files", &["*"])
+								.show_open_single_file()
+								.unwrap();
+							self.path = match path {
+								Some(path) => path.to_str().unwrap().to_owned(),
+								None => return,
+							};
+						};
+					});
+				} else {
+					ui.horizontal(|ui| {
+						ui.label("Wpisz: ");
+					});
+					ui.text_edit_multiline::<String>(&mut self.rna);
+				};
+				ui.separator();
+				ui.horizontal(|ui| {
+					ui.label("Separator: ");
+					ui.text_edit_singleline::<String>(&mut self.separator);
+				});
+				ui.checkbox(&mut self.delete_wrong_chars, "Usuń niepoprawne znaki");
 			});
 
 		CentralPanel::default().show(ctx, |ui| {});
