@@ -1,17 +1,11 @@
-use rnalib::AminoString;
-fn main() {
-	let mut buffer = String::new();
-	std::io::stdin()
-		.read_line(&mut buffer)
-		.expect("Coś poszło nie tak!");
-	buffer = buffer.trim().into();
+mod app;
+use app::*;
 
-	let amino_strings = AminoString::parse(&buffer);
-	for amino in amino_strings {
-		let proteins = amino.get_proteins();
-		amino.get_isoletric_point();
-		println!("{amino}, {} protein(s)", proteins.len());
-		proteins.iter().for_each(|x| println!("• {x}"));
-		println!();
-	}
+fn main() {
+	let native_options = eframe::NativeOptions::default();
+	eframe::run_native(
+		"Motorola Białka",
+		native_options,
+		Box::new(|cc| Box::new(App::new(cc))),
+	);
 }
