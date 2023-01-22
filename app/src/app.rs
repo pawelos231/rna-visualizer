@@ -1,38 +1,12 @@
-use std::collections::HashMap;
-
 use eframe::Frame;
 use egui::{Button, CentralPanel, Context, ScrollArea, SidePanel, TopBottomPanel};
-use rnalib::{AminoString, Protein};
+use rnalib::{AminoString, ProteinMap};
 
 #[derive(Default)]
 pub struct App {
 	rna: String,
 	proteins: ProteinMap,
-}
-
-#[derive(Default)]
-struct ProteinMap {
-	proteins: HashMap<String, Protein>,
-	sorted_keys: Vec<String>,
-}
-
-impl ProteinMap {
-	fn new(source: Vec<Protein>) -> Self {
-		let mut proteins = HashMap::new();
-		let mut sorted_keys = Vec::new();
-
-		for protein in source {
-			sorted_keys.push(protein.to_string());
-			proteins.insert(protein.to_string(), protein);
-		}
-
-		sorted_keys.sort_by(|a, b| a.to_string().len().cmp(&b.to_string().len()));
-
-		Self {
-			proteins,
-			sorted_keys,
-		}
-	}
+	flag: bool,
 }
 
 impl App {
@@ -46,9 +20,10 @@ impl eframe::App for App {
 	fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
 		TopBottomPanel::top("TOP").show(ctx, |ui| {
 			ui.horizontal(|ui| {
-				ui.label("Ciąg RNA");
+				ui.label("Ciąg RNA:");
 				ui.text_edit_singleline::<String>(&mut self.rna);
 				if ui.button("Wczytaj").clicked() {
+					self.flag = true;
 					let mut proteins = Vec::new();
 					for amino in AminoString::parse(&self.rna) {
 						for protein in amino.get_proteins() {
@@ -56,6 +31,13 @@ impl eframe::App for App {
 						}
 					}
 					self.proteins = ProteinMap::new(proteins);
+				};
+				if ui.button("Wytnij niepoprawne znaki").clicked() {
+					for character in self.rna.chars().find() {
+						if character.to_ascii_uppercase() != 'A' {
+							println!("sraka")
+						}
+					}
 				}
 			});
 		});
@@ -66,6 +48,9 @@ impl eframe::App for App {
 			.width_range(80.0..=200.0)
 			.show(ctx, |ui| {
 				ScrollArea::vertical().show(ui, |ui| {
+					if self.proteins.sorted_keys.len() as u32 == 0 && self.flag {
+						ui.add_sized([300., 30.], Button::new("Nie znaleziono zadnych białek"));
+					};
 					for protein in &self.proteins.sorted_keys {
 						ui.add_sized([300., 30.], Button::new(protein));
 					}
