@@ -14,13 +14,12 @@ impl ProteinMap {
 
 		for protein in source {
 			let key = protein.to_string();
-			if !sorted_keys.contains(&key) {
-				proteins.insert(key.clone(), protein);
+			if proteins.insert(key.clone(), protein).is_none() {
 				sorted_keys.push(key);
 			}
 		}
 
-		sorted_keys.sort_by_key(|a| a.to_string().len());
+		sorted_keys.sort_unstable_by_key(|a| a.len());
 
 		Self {
 			proteins,

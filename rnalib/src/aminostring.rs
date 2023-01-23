@@ -21,19 +21,14 @@ impl AminoString {
 		let mut source = source.replace(' ', "");
 		let mut res = Vec::new();
 		for _ in 0..3.min(source.len()) {
-			let chars = source.chars().collect::<Vec<_>>();
-			res.push(AminoString::from(
-				chars
-					.chunks_exact(3)
-					.map(|x| {
-						x.iter()
-							.map(|x| Nucleotide::parse(*x).unwrap())
-							.next_tuple::<(_, _, _)>()
-							.map(|x| Codon::new(x.0, x.1, x.2))
-							.unwrap()
-					})
-					.collect::<Vec<_>>(),
-			));
+			let mut chars = source.chars().map(|x| Nucleotide::parse(x).unwrap());
+			let mut codons = Vec::new();
+
+			while let (Some(a), Some(b), Some(c)) = (chars.next(), chars.next(), chars.next()) {
+				codons.push(Codon::new(a, b, c));
+			}
+
+			res.push(AminoString::from(codons));
 			source.remove(0);
 		}
 

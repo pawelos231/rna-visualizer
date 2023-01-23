@@ -1,6 +1,8 @@
 use egui::*;
 use native_dialog::FileDialog;
 
+use super::fast_text_edit::FastTextEdit;
+
 #[derive(Default)]
 pub struct ImportWindow {
 	pub visible: bool,
@@ -44,13 +46,18 @@ impl ImportWindow {
 			return String::from("Invalid file path")
 		};
 
-		output = output.as_str().replace(&self.separator, "");
-
-		if self.delete_wrong_chars {
-			output.retain(|x| "AGCUT ".contains(x.to_ascii_uppercase()));
+		if self.separator.len() != 0 {
+			output = output.as_str().replace(&self.separator, "");
 		}
 
-		output.to_ascii_uppercase()
+		if self.delete_wrong_chars {
+			output.retain(|x| match x {
+				'A' | 'G' | 'C' | 'U' | 'T' | 'a' | 'g' | 'c' | 'u' | 't' | ' ' => true,
+				_ => false,
+			});
+		}
+
+		output
 	}
 
 	fn show_source_select(&mut self, ui: &mut Ui) {
@@ -65,7 +72,7 @@ impl ImportWindow {
 		ui.label("Ścieżka pliku: ");
 		ui.horizontal(|ui| {
 			ui.centered_and_justified(|ui| {
-				ui.text_edit_singleline(&mut self.path);
+				FastTextEdit::singleline(ui, &mut self.path);
 				if ui.button("Wybierz plik...").clicked() {
 					let path = FileDialog::new()
 						.set_location("~/Desktop")
