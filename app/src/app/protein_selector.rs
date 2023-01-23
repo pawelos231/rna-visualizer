@@ -13,7 +13,7 @@ impl ProteinSelector {
 		let min_y = ui.cursor().min.y;
 		let max_y = ui.available_height();
 		ScrollArea::vertical().show(ui, |ui| {
-			if proteins.sorted_keys.len() == 0 {
+			if proteins.sorted_keys.is_empty() {
 				ui.centered_and_justified(|ui| ui.label("Brak białek do wyświetlenia"));
 			};
 

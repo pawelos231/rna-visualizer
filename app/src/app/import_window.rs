@@ -108,9 +108,9 @@ impl ImportWindow {
 		ui.label(RichText::new("Podgląd:").strong());
 		ui.horizontal(|ui| {
 			ui.centered_and_justified(|ui| {
-				egui::ScrollArea::vertical().show(ui, |ui| {
+				ScrollArea::vertical().show(ui, |ui| {
 					let max_w = ui.available_width() as usize;
-					egui::Grid::new("PREVIEW_GRID").show(ui, |ui| {
+					Grid::new("PREVIEW_GRID").show(ui, |ui| {
 						self.preview
 							.chars()
 							.collect::<Vec<_>>()
