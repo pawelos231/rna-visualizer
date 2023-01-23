@@ -1,4 +1,3 @@
-use crate::ProteinMap;
 use eframe::Frame;
 use egui::{CentralPanel, Context, SidePanel, TopBottomPanel};
 use rnalib::AminoString;
@@ -12,11 +11,13 @@ use protein_selector::ProteinSelector;
 mod fast_text_edit;
 use fast_text_edit::FastTextEdit;
 
+use crate::protein_map::ProteinMap;
+pub type ProteinCollection = ProteinMap;
+
 #[derive(Default)]
 pub struct App {
 	rna: String,
-	proteins: ProteinMap,
-	flag: bool,
+	proteins: ProteinCollection,
 	import_window: ImportWindow,
 	protein_selector: ProteinSelector,
 }
@@ -39,14 +40,15 @@ impl eframe::App for App {
 				ui.label("Ciąg RNA:");
 				FastTextEdit::singleline(ui, &mut self.rna);
 				if ui.button("Wczytaj").clicked() {
-					self.flag = true;
 					let mut proteins = Vec::new();
 					for amino in AminoString::parse(&self.rna) {
-						for protein in amino.get_proteins() {
-							proteins.push(protein);
-						}
+						println!("finished aminostring...");
+						proteins.append(&mut amino.get_proteins());
+						println!("finished append...");
 					}
+					println!("finished proteins...");
 					self.proteins = ProteinMap::new(proteins);
+					println!("finished assembling protein map...");
 				};
 				if ui.button("Wytnij niepoprawne znaki").clicked() {
 					self.rna

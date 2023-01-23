@@ -27,10 +27,3 @@ impl Display for Protein {
 		self.deref().fmt(f)
 	}
 }
-
-impl PartialEq for Protein {
-	fn eq(&self, other: &Self) -> bool {
-		self.string.len() == other.string.len()
-			&& self.string.to_string() == other.string.to_string()
-	}
-}
