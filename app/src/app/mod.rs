@@ -1,5 +1,5 @@
 use eframe::{epaint::Shadow, Frame};
-use egui::{CentralPanel, Context, Rounding, SidePanel, Stroke, TopBottomPanel};
+use egui::{CentralPanel, Context, Rounding, SidePanel, TopBottomPanel};
 use rnalib::AminoString;
 
 mod import_window;

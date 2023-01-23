@@ -14,7 +14,9 @@ eframe = { version = "0.20.0", default-features = false, features = [
 	"glow"
 ]}
 native-dialog = "0.6.3"
+stringreader = "*"
 mimalloc = { version = "0.1.17", default-features = false }
+utf8-chars = "2.0.3"
 
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1"

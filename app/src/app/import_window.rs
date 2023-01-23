@@ -1,5 +1,11 @@
+use std::{
+	fs::File,
+	io::{BufRead, BufReader, Read},
+};
+
 use egui::*;
 use native_dialog::FileDialog;
+use stringreader::StringReader;
 
 use super::fast_text_edit::FastTextEdit;
 
@@ -8,6 +14,8 @@ pub struct ImportWindow {
 	pub visible: bool,
 	separator: String,
 	delete_wrong_chars: bool,
+	delete_header: bool,
+	header_len: u32,
 	from_file: bool,
 	input_rna: String,
 	path: String,
@@ -36,30 +44,67 @@ impl ImportWindow {
 		import
 	}
 
+	#[allow(clippy::needless_range_loop)]
 	pub fn generate_output(&self) -> String {
-		let output = match self.from_file {
-			true => std::fs::read_to_string(&self.path),
-			false => Ok(self.input_rna.to_owned()),
-		};
-
-		let Ok(mut output) = output else {
-			return String::from("Invalid file path")
-		};
-
-		if !self.separator.is_empty() {
-			output = output.as_str().replace(&self.separator, "");
+		enum Readable<'a> {
+			Fs(File),
+			Str(StringReader<'a>),
 		}
 
-		if self.delete_wrong_chars {
-			output.retain(|x| {
-				matches!(
-					x,
-					'A' | 'G' | 'C' | 'U' | 'T' | 'a' | 'g' | 'c' | 'u' | 't' | ' '
-				)
-			});
+		impl<'a> Read for Readable<'a> {
+			fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+				match self {
+					Readable::Fs(reader) => reader.read(buf),
+					Readable::Str(reader) => reader.read(buf),
+				}
+			}
 		}
 
-		output
+		let readable = match self.from_file {
+			true => Readable::Fs(File::open(&self.path).unwrap()),
+			false => Readable::Str(StringReader::new(&self.input_rna)),
+		};
+
+		let length = match &readable {
+			Readable::Fs(reader) => reader.metadata().unwrap().len() as usize,
+			Readable::Str(_) => self.input_rna.len(),
+		};
+
+		let mut result_buffer = String::with_capacity(length);
+		let mut reader = BufReader::new(readable);
+
+		if self.delete_header {
+			for _ in 0..self.header_len {
+				reader.read_until(b'\n', &mut Vec::new()).ok();
+			}
+		}
+
+		let separator_len = self.separator.len();
+		let rem_separator = separator_len != 0;
+
+		let mut byte_buff = [0u8; 4096];
+		while let Ok(len) = reader.read(&mut byte_buff) {
+			if len == 0 {
+				break;
+			}
+			for i in 0..len {
+				let ch = byte_buff[i] as char;
+				if matches!(
+					ch,
+					'A' | 'G' | 'C' | 'U' | 'T' | 'a' | 'g' | 'c' | 'u' | 't'
+				) {
+					result_buffer.push(ch);
+					if rem_separator && result_buffer.ends_with(&self.separator) {
+						for _ in 0..separator_len {
+							result_buffer.pop();
+						}
+					}
+				}
+			}
+		}
+
+		result_buffer.shrink_to_fit();
+		result_buffer
 	}
 
 	fn show_source_select(&mut self, ui: &mut Ui) {
@@ -104,12 +149,19 @@ impl ImportWindow {
 		ui.separator();
 		ui.label(RichText::new("Ustawienia preprocesora:").strong());
 		ui.horizontal(|ui| {
-			ui.label("Separator: ");
+			ui.label("Separator:");
 			ui.centered_and_justified(|ui| {
 				ui.text_edit_singleline(&mut self.separator);
 			});
 		});
 		ui.checkbox(&mut self.delete_wrong_chars, "Usuń niepoprawne znaki");
+		ui.checkbox(&mut self.delete_header, "Usuń nagłówek");
+		ui.horizontal(|ui| {
+			ui.add_enabled_ui(self.delete_header, |ui| {
+				ui.label("Ilość linii do usunięcia:");
+				ui.add(DragValue::new(&mut self.header_len));
+			});
+		});
 	}
 
 	fn show_preview(&mut self, ui: &mut Ui) {
