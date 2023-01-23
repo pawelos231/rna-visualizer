@@ -109,15 +109,16 @@ impl ImportWindow {
 		ui.horizontal(|ui| {
 			ui.centered_and_justified(|ui| {
 				egui::ScrollArea::vertical().show(ui, |ui| {
-					ui.add_enabled_ui(false, |ui| {
-						ui.add(
-							egui::TextEdit::multiline(&mut self.preview)
-								.font(egui::TextStyle::Monospace)
-								.code_editor()
-								.desired_rows(4)
-								.lock_focus(true)
-								.desired_width(f32::INFINITY),
-						);
+					let max_w = ui.available_width() as usize;
+					egui::Grid::new("PREVIEW_GRID").show(ui, |ui| {
+						self.preview
+							.chars()
+							.collect::<Vec<_>>()
+							.chunks(max_w / 7)
+							.for_each(|x| {
+								ui.label(RichText::new(x.iter().collect::<String>()).monospace());
+								ui.end_row();
+							});
 					});
 				});
 				if ui.button("Odśwież").clicked() {
