@@ -58,6 +58,7 @@ impl ProteinSelector {
 		min_y: f32,
 		max_y: f32,
 	) {
+		let button_width = ui.available_width();
 		let iter = proteins.keys().skip(self.page * Self::PAGINATION);
 		for protein in iter.take(Self::PAGINATION) {
 			let stringed = &protein.0;
@@ -65,15 +66,23 @@ impl ProteinSelector {
 
 			let cursor = ui.cursor().min.y;
 
+			ui.style_mut().override_text_style = Some(TextStyle::Monospace);
+
 			ui.set_clip_rect(Rect::NOTHING);
-			let rect = ui.add_sized([300., 30.], Button::new(stringed)).rect;
+			let rect = ui
+				.add_sized([button_width, 30.], Button::new(stringed))
+				.rect;
 			ui.set_clip_rect(old_clip_rect);
 
 			if cursor < min_y - rect.height() || cursor > max_y + 100.0 {
 				continue;
 			}
 
-			ui.allocate_ui_at_rect(rect, |ui| ui.add_sized([300., 30.], Button::new(stringed)));
+			ui.allocate_ui_at_rect(rect, |ui| {
+				ui.add_sized([button_width, 30.], Button::new(stringed))
+			});
+
+			ui.style_mut().override_text_style = None;
 		}
 	}
 }

@@ -11,8 +11,10 @@ rnavis = { path = "../rnavis" }
 egui = "0.20.1"
 eframe = { version = "0.20.0", default-features = false, features = [
 	"default_fonts",
-	"glow",
-	"persistence"
+	"glow"
 ]}
 native-dialog = "0.6.3"
 mimalloc = { version = "0.1.17", default-features = false }
+
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1"
