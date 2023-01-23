@@ -4,7 +4,7 @@ use crate::{Acid, Nucleotide};
 
 #[derive(Clone)]
 pub struct Codon {
-	shorthand: char,
+	shorthand: u8,
 }
 
 impl Codon {
@@ -42,21 +42,21 @@ impl Codon {
 			(G, A, U | C) => 'D',
 			(G, A, A | G) => 'E',
 			(G, G, _) => 'G',
-		};
+		} as u8;
 		Self { shorthand }
 	}
 
 	pub const fn get_acid(&self) -> Option<Acid> {
-		Acid::from_shorthand(self.shorthand)
+		Acid::from_shorthand(self.shorthand as char)
 	}
 
 	pub const fn get_acid_shorthand(&self) -> char {
-		self.shorthand
+		self.shorthand as char
 	}
 }
 
 impl Display for Codon {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_char(self.shorthand)
+		f.write_char(self.shorthand as char)
 	}
 }

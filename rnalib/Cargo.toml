@@ -9,8 +9,3 @@ edition = "2021"
 itertools = "0.10.5"
 concat-idents = "1.1.4"
 const-str = "0.5.3"
-
-[profile.release]
-lto = "fat"
-codegen-units = 1
-panic = "abort"

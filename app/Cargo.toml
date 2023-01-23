@@ -16,8 +16,3 @@ eframe = { version = "0.20.0", default-features = false, features = [
 ]}
 native-dialog = "0.6.3"
 mimalloc = { version = "0.1.17", default-features = false }
-
-[profile.release]
-lto = "fat"
-codegen-units = 1
-panic = "abort"
