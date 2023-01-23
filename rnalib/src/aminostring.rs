@@ -119,9 +119,8 @@ impl AminoString {
 
 			if acid == Codon::STOP && protein {
 				if !current.is_empty() {
-					current.shrink_to_fit();
-					result.push(Protein::from(current));
-					current = Vec::with_capacity(30000);
+					result.push(Protein::from(current.clone()));
+					current.clear();
 				}
 				protein = false;
 			}
