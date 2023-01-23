@@ -3,32 +3,73 @@ use egui::*;
 use crate::protein_map::ProteinMap;
 
 #[derive(Default)]
-pub struct ProteinSelector;
+pub struct ProteinSelector {
+	page: usize,
+}
 
 impl ProteinSelector {
+	const PAGINATION: usize = 100;
+
 	pub fn show(&mut self, ui: &mut Ui, proteins: &ProteinMap) {
 		let min_y = ui.cursor().min.y;
 		let max_y = ui.available_height();
 		ScrollArea::vertical().show(ui, |ui| {
-			if proteins.sorted_keys.is_empty() {
-				ui.centered_and_justified(|ui| ui.label("Brak białek do wyświetlenia"));
-			};
+			self.show_empty_message(ui, proteins);
+			self.show_pagination_header(ui, proteins);
+			self.show_paginated_items(ui, proteins, min_y, max_y);
+		});
+	}
 
-			for protein in &proteins.sorted_keys {
-				let old_clip_rect = ui.clip_rect();
+	fn show_empty_message(&self, ui: &mut Ui, proteins: &ProteinMap) {
+		if proteins.sorted_keys.is_empty() {
+			ui.centered_and_justified(|ui| ui.label("Brak białek do wyświetlenia"));
+		};
+	}
 
-				let cursor = ui.cursor().min.y;
-
-				ui.set_clip_rect(Rect::NOTHING);
-				let rect = ui.add_sized([300., 30.], Button::new(protein)).rect;
-				ui.set_clip_rect(old_clip_rect);
-
-				if cursor < min_y - rect.height() || cursor > max_y + 100.0 {
-					continue;
+	fn show_pagination_header(&mut self, ui: &mut Ui, proteins: &ProteinMap) {
+		let pages = proteins.sorted_keys.len() / Self::PAGINATION;
+		if pages > 0 {
+			ui.horizontal(|ui| {
+				let button = ui.button("<");
+				if button.clicked() && self.page > 0 {
+					self.page -= 1;
 				}
 
-				ui.allocate_ui_at_rect(rect, |ui| ui.add_sized([300., 30.], Button::new(protein)));
+				let text = format!("Strona {}/{}", self.page + 1, pages + 1);
+				ui.add_sized(
+					[ui.available_width() - button.rect.width() - 12.0, 20.],
+					Label::new(text),
+				);
+
+				if ui.button(">").clicked() {
+					self.page += 1;
+				}
+				self.page = self.page.min(pages);
+			});
+		} else {
+			self.page = 0;
+		}
+	}
+
+	fn show_paginated_items(&mut self, ui: &mut Ui, proteins: &ProteinMap, min_y: f32, max_y: f32) {
+		let iter = proteins
+			.sorted_keys
+			.iter()
+			.skip(self.page * Self::PAGINATION);
+		for protein in iter.take(Self::PAGINATION) {
+			let old_clip_rect = ui.clip_rect();
+
+			let cursor = ui.cursor().min.y;
+
+			ui.set_clip_rect(Rect::NOTHING);
+			let rect = ui.add_sized([300., 30.], Button::new(protein)).rect;
+			ui.set_clip_rect(old_clip_rect);
+
+			if cursor < min_y - rect.height() || cursor > max_y + 100.0 {
+				continue;
 			}
-		});
+
+			ui.allocate_ui_at_rect(rect, |ui| ui.add_sized([300., 30.], Button::new(protein)));
+		}
 	}
 }
