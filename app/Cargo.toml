@@ -15,3 +15,6 @@ eframe = { version = "0.20.0", default-features = false, features = [
 	"persistence"
 ]}
 native-dialog = "0.6.3"
+
+[profile.release]
+lto = true

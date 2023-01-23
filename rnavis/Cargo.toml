@@ -12,3 +12,6 @@ usvg = "0.28.0"
 const-str = "0.5.3"
 concat-idents = "1.1.4"
 rnalib = { path="../rnalib" }
+
+[profile.release]
+lto = true

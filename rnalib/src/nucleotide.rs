@@ -24,10 +24,10 @@ impl Nucleotide {
 impl Display for Nucleotide {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		f.write_char(match self {
-			G => 'G',
-			U => 'U',
-			A => 'A',
-			C => 'C',
+			Self::G => 'G',
+			Self::U => 'U',
+			Self::A => 'A',
+			Self::C => 'C',
 		})
 	}
 }
