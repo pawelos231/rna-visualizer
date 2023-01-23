@@ -46,7 +46,7 @@ impl ImportWindow {
 			return String::from("Invalid file path")
 		};
 
-		if self.separator.len() != 0 {
+		if !self.separator.is_empty() {
 			output = output.as_str().replace(&self.separator, "");
 		}
 
