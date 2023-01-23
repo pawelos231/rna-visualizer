@@ -4,26 +4,16 @@ use crate::{Acid, Nucleotide};
 
 #[derive(Clone)]
 pub struct Codon {
-	nucleotides: (Nucleotide, Nucleotide, Nucleotide),
+	shorthand: char,
 }
 
 impl Codon {
 	pub const STOP: char = '_';
 	pub const START: char = 'M';
 
-	pub fn new(a: Nucleotide, b: Nucleotide, c: Nucleotide) -> Self {
-		Self {
-			nucleotides: (a, b, c),
-		}
-	}
-
-	pub fn get_acid(&self) -> Option<Acid> {
-		Acid::from_shorthand(self.get_acid_shorthand())
-	}
-
-	pub fn get_acid_shorthand(&self) -> char {
+	pub fn new(a: &Nucleotide, b: &Nucleotide, c: &Nucleotide) -> Self {
 		use Nucleotide::*;
-		match self.nucleotides {
+		let shorthand = match (a, b, c) {
 			(U, U, U | C) => 'F',
 			(U, U, A | G) => 'L',
 			(U, C, _) => 'S',
@@ -52,12 +42,21 @@ impl Codon {
 			(G, A, U | C) => 'D',
 			(G, A, A | G) => 'E',
 			(G, G, _) => 'G',
-		}
+		};
+		Self { shorthand }
+	}
+
+	pub fn get_acid(&self) -> Option<Acid> {
+		Acid::from_shorthand(self.shorthand)
+	}
+
+	pub fn get_acid_shorthand(&self) -> char {
+		self.shorthand
 	}
 }
 
 impl Display for Codon {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_char(self.get_acid_shorthand())
+		f.write_char(self.shorthand)
 	}
 }

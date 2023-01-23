@@ -17,19 +17,29 @@ impl AminoString {
 		self.codons.push(codon);
 	}
 
+	pub fn len(&self) -> usize {
+		self.codons.len()
+	}
+
 	pub fn parse(source: &str) -> Vec<Self> {
-		let mut source = source.replace(' ', "");
+		let mut temp = Vec::with_capacity(3);
 		let mut res = Vec::new();
+		let mut index = 0;
 		for _ in 0..3.min(source.len()) {
-			let mut chars = source.chars().map(|x| Nucleotide::parse(x).unwrap());
+			let mut chars = source.chars().skip(index);
 			let mut codons = Vec::new();
-
-			while let (Some(a), Some(b), Some(c)) = (chars.next(), chars.next(), chars.next()) {
-				codons.push(Codon::new(a, b, c));
+			while let Some(next) = chars.next() {
+				if next != ' ' {
+					temp.push(Nucleotide::parse(next).unwrap());
+				}
+				if temp.len() == 3 {
+					codons.push(Codon::new(&temp[0], &temp[1], &temp[2]));
+					temp.clear();
+				}
 			}
-
 			res.push(AminoString::from(codons));
-			source.remove(0);
+			temp.clear();
+			index += 1;
 		}
 
 		res

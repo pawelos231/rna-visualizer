@@ -1,6 +1,5 @@
 use egui::*;
-
-use crate::protein_map::ProteinMap;
+use rnalib::Protein;
 
 #[derive(Default)]
 pub struct ProteinSelector {
@@ -10,7 +9,7 @@ pub struct ProteinSelector {
 impl ProteinSelector {
 	const PAGINATION: usize = 100;
 
-	pub fn show(&mut self, ui: &mut Ui, proteins: &ProteinMap) {
+	pub fn show(&mut self, ui: &mut Ui, proteins: &Vec<Protein>) {
 		let min_y = ui.cursor().min.y;
 		let max_y = ui.available_height();
 		ScrollArea::vertical().show(ui, |ui| {
@@ -20,14 +19,14 @@ impl ProteinSelector {
 		});
 	}
 
-	fn show_empty_message(&self, ui: &mut Ui, proteins: &ProteinMap) {
-		if proteins.sorted_keys.is_empty() {
+	fn show_empty_message(&self, ui: &mut Ui, proteins: &Vec<Protein>) {
+		if proteins.is_empty() {
 			ui.centered_and_justified(|ui| ui.label("Brak białek do wyświetlenia"));
 		};
 	}
 
-	fn show_pagination_header(&mut self, ui: &mut Ui, proteins: &ProteinMap) {
-		let pages = proteins.sorted_keys.len() / Self::PAGINATION;
+	fn show_pagination_header(&mut self, ui: &mut Ui, proteins: &Vec<Protein>) {
+		let pages = proteins.len() / Self::PAGINATION;
 		if pages > 0 {
 			ui.horizontal(|ui| {
 				let button = ui.button("<");
@@ -51,25 +50,29 @@ impl ProteinSelector {
 		}
 	}
 
-	fn show_paginated_items(&mut self, ui: &mut Ui, proteins: &ProteinMap, min_y: f32, max_y: f32) {
-		let iter = proteins
-			.sorted_keys
-			.iter()
-			.skip(self.page * Self::PAGINATION);
+	fn show_paginated_items(
+		&mut self,
+		ui: &mut Ui,
+		proteins: &Vec<Protein>,
+		min_y: f32,
+		max_y: f32,
+	) {
+		let iter = proteins.iter().skip(self.page * Self::PAGINATION);
 		for protein in iter.take(Self::PAGINATION) {
+			let stringed = protein.to_string();
 			let old_clip_rect = ui.clip_rect();
 
 			let cursor = ui.cursor().min.y;
 
 			ui.set_clip_rect(Rect::NOTHING);
-			let rect = ui.add_sized([300., 30.], Button::new(protein)).rect;
+			let rect = ui.add_sized([300., 30.], Button::new(&stringed)).rect;
 			ui.set_clip_rect(old_clip_rect);
 
 			if cursor < min_y - rect.height() || cursor > max_y + 100.0 {
 				continue;
 			}
 
-			ui.allocate_ui_at_rect(rect, |ui| ui.add_sized([300., 30.], Button::new(protein)));
+			ui.allocate_ui_at_rect(rect, |ui| ui.add_sized([300., 30.], Button::new(&stringed)));
 		}
 	}
 }
