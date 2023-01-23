@@ -11,7 +11,7 @@ impl Codon {
 	pub const STOP: char = '_';
 	pub const START: char = 'M';
 
-	pub fn new(a: &Nucleotide, b: &Nucleotide, c: &Nucleotide) -> Self {
+	pub const fn new(a: &Nucleotide, b: &Nucleotide, c: &Nucleotide) -> Self {
 		use Nucleotide::*;
 		let shorthand = match (a, b, c) {
 			(U, U, U | C) => 'F',
@@ -46,11 +46,11 @@ impl Codon {
 		Self { shorthand }
 	}
 
-	pub fn get_acid(&self) -> Option<Acid> {
+	pub const fn get_acid(&self) -> Option<Acid> {
 		Acid::from_shorthand(self.shorthand)
 	}
 
-	pub fn get_acid_shorthand(&self) -> char {
+	pub const fn get_acid_shorthand(&self) -> char {
 		self.shorthand
 	}
 }

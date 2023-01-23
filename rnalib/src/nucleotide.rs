@@ -7,7 +7,7 @@ pub enum Nucleotide {
 }
 
 impl Nucleotide {
-	pub fn parse(from: char) -> Option<Self> {
+	pub const fn parse(from: char) -> Option<Self> {
 		use Nucleotide::*;
 		match from.to_ascii_uppercase() {
 			'G' => Some(G),
