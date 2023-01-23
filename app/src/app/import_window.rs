@@ -51,9 +51,11 @@ impl ImportWindow {
 		}
 
 		if self.delete_wrong_chars {
-			output.retain(|x| match x {
-				'A' | 'G' | 'C' | 'U' | 'T' | 'a' | 'g' | 'c' | 'u' | 't' | ' ' => true,
-				_ => false,
+			output.retain(|x| {
+				matches!(
+					x,
+					'A' | 'G' | 'C' | 'U' | 'T' | 'a' | 'g' | 'c' | 'u' | 't' | ' '
+				)
 			});
 		}
 

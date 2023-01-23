@@ -53,7 +53,7 @@ macro_rules! acid_table {
 		)*
 
 		impl Acid {
-			$(pub const $id: Acid = Acid::new($three_letter, $sc_mass, $pk1, $pk2, $pk3, $sc_hbob, $extco);)*
+			$(#[allow(clippy::excessive_precision)] pub const $id: Acid = Acid::new($three_letter, $sc_mass, $pk1, $pk2, $pk3, $sc_hbob, $extco);)*
 			pub const fn from_shorthand(code: char) -> Option<Acid> {
 				match code.to_ascii_uppercase() {
 					$(concat_idents!(name = $id , _CHAR { name } ) => Some(Self::$id),)*

@@ -21,6 +21,10 @@ impl AminoString {
 		self.codons.len()
 	}
 
+	pub fn is_empty(&self) -> bool {
+		self.codons.len() == 0
+	}
+
 	pub fn parse(source: &str) -> Vec<Self> {
 		let mut temp = [Nucleotide::A, Nucleotide::A, Nucleotide::A];
 		let mut temp_idx = 0;

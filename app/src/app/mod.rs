@@ -42,13 +42,9 @@ impl eframe::App for App {
 				if ui.button("Wczytaj").clicked() {
 					let mut proteins = Vec::new();
 					for amino in AminoString::parse(&self.rna) {
-						println!("finished aminostring...");
 						proteins.append(&mut amino.get_proteins());
-						println!("finished append...");
 					}
-					println!("finished proteins...");
 					self.proteins = ProteinMap::new(proteins);
-					println!("finished assembling protein map...");
 				};
 				if ui.button("Wytnij niepoprawne znaki").clicked() {
 					self.rna
