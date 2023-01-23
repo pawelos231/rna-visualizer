@@ -112,16 +112,16 @@ impl AminoString {
 	pub fn get_proteins(&self) -> Vec<Protein> {
 		let mut result = Vec::new();
 
-		let mut current = Vec::new();
+		let mut current = Vec::with_capacity(30000);
 		let mut protein = false;
 		for codon in &self.codons {
 			let acid = codon.get_acid_shorthand();
 
 			if acid == Codon::STOP && protein {
 				if !current.is_empty() {
-					let mut new_codon = Vec::new();
-					std::mem::swap(&mut current, &mut new_codon);
-					result.push(Protein::from(new_codon));
+					current.shrink_to_fit();
+					result.push(Protein::from(current));
+					current = Vec::with_capacity(30000);
 				}
 				protein = false;
 			}
