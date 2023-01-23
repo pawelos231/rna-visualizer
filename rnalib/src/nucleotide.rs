@@ -1,3 +1,5 @@
+use std::fmt::{Display, Write};
+
 #[derive(Clone)]
 pub enum Nucleotide {
 	G,
@@ -16,5 +18,16 @@ impl Nucleotide {
 			'C' | 'c' => Some(C),
 			_ => None,
 		}
+	}
+}
+
+impl Display for Nucleotide {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.write_char(match self {
+			G => 'G',
+			U => 'U',
+			A => 'A',
+			C => 'C',
+		})
 	}
 }

@@ -26,9 +26,8 @@ impl AminoString {
 		let mut temp_idx = 0;
 
 		let mut res = Vec::new();
-		let mut index = 0;
 
-		for _ in 0..3.min(source.len()) {
+		for index in 0..3.min(source.len()) {
 			let mut codons = Vec::new();
 			codons.reserve(source.len() / 3);
 			source
@@ -38,6 +37,7 @@ impl AminoString {
 				.map(|x| Nucleotide::parse(x).unwrap())
 				.for_each(|x| {
 					temp[temp_idx] = x;
+					temp_idx += 1;
 					if temp_idx == 3 {
 						codons.push(Codon::new(&temp[0], &temp[1], &temp[2]));
 						temp_idx = 0;
@@ -45,7 +45,6 @@ impl AminoString {
 				});
 			res.push(AminoString::from(codons));
 			temp_idx = 0;
-			index += 1;
 		}
 		res
 	}
