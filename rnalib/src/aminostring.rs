@@ -9,7 +9,7 @@ pub struct AminoString {
 }
 
 impl AminoString {
-	pub fn from(codons: Vec<Codon>) -> Self {
+	pub const fn from(codons: Vec<Codon>) -> Self {
 		Self { codons }
 	}
 
@@ -22,42 +22,29 @@ impl AminoString {
 	}
 
 	pub fn parse(source: &str) -> Vec<Self> {
-		struct FVec {
-			idx: usize,
-			arr: [Nucleotide; 3],
-		}
+		let mut temp = [Nucleotide::A, Nucleotide::A, Nucleotide::A];
+		let mut temp_idx = 0;
 
-		impl FVec {
-			fn new() -> Self {
-				use Nucleotide::*;
-				Self {
-					idx: 0,
-					arr: [A, A, A],
-				}
-			}
-
-			fn push(&mut self, nucleotide: Nucleotide) {
-				self.arr[self.idx] = nucleotide;
-				self.idx += 1;
-			}
-		}
-
-		let mut temp = FVec::new();
 		let mut res = Vec::new();
 		let mut index = 0;
+
 		for _ in 0..3.min(source.len()) {
-			let chars = source.chars().skip(index).filter(|x| *x != ' ');
 			let mut codons = Vec::new();
 			codons.reserve(source.len() / 3);
-			chars.map(|x| Nucleotide::parse(x).unwrap()).for_each(|x| {
-				temp.push(x);
-				if temp.idx == 3 {
-					codons.push(Codon::new(&temp.arr[0], &temp.arr[1], &temp.arr[2]));
-					temp.idx = 0;
-				}
-			});
+			source
+				.chars()
+				.skip(index)
+				.filter(|x| *x != ' ')
+				.map(|x| Nucleotide::parse(x).unwrap())
+				.for_each(|x| {
+					temp[temp_idx] = x;
+					if temp_idx == 3 {
+						codons.push(Codon::new(&temp[0], &temp[1], &temp[2]));
+						temp_idx = 0;
+					}
+				});
 			res.push(AminoString::from(codons));
-			temp.idx = 0;
+			temp_idx = 0;
 			index += 1;
 		}
 		res
