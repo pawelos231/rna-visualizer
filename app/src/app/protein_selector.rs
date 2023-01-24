@@ -1,4 +1,5 @@
 use egui::*;
+use rnalib::Protein;
 
 type ProteinCollection = super::ProteinMap;
 
@@ -10,14 +11,16 @@ pub struct ProteinSelector {
 impl ProteinSelector {
 	const PAGINATION: usize = 100;
 
-	pub fn show(&mut self, ui: &mut Ui, proteins: &ProteinCollection) {
+	pub fn show(&mut self, ui: &mut Ui, proteins: &ProteinCollection) -> Option<Protein> {
+		let mut result = None;
 		let min_y = ui.cursor().min.y;
 		let max_y = ui.available_height();
 		ScrollArea::vertical().show(ui, |ui| {
 			self.show_empty_message(ui, proteins);
 			self.show_pagination_header(ui, proteins);
-			self.show_paginated_items(ui, proteins, min_y, max_y);
+			result = self.show_paginated_items(ui, proteins, min_y, max_y);
 		});
+		result
 	}
 
 	fn show_empty_message(&self, ui: &mut Ui, proteins: &ProteinCollection) {
@@ -57,7 +60,8 @@ impl ProteinSelector {
 		proteins: &ProteinCollection,
 		min_y: f32,
 		max_y: f32,
-	) {
+	) -> Option<Protein> {
+		let mut result = None;
 		let button_width = ui.available_width();
 		let iter = proteins.keys().skip(self.page * Self::PAGINATION);
 		for protein in iter.take(Self::PAGINATION) {
@@ -79,10 +83,16 @@ impl ProteinSelector {
 			}
 
 			ui.allocate_ui_at_rect(rect, |ui| {
-				ui.add_sized([button_width, 30.], Button::new(stringed))
+				if ui
+					.add_sized([button_width, 30.], Button::new(stringed))
+					.clicked()
+				{
+					result = proteins.get_cloned(protein);
+				}
 			});
 
 			ui.style_mut().override_text_style = None;
 		}
+		result
 	}
 }

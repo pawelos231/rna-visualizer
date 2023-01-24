@@ -6,7 +6,7 @@ fn main() -> io::Result<()> {
 	#[cfg(windows)]
 	{
 		WindowsResource::new()
-			.set_icon("./src/build/icon.ico")
+			.set_icon("./icon/icon.ico")
 			.compile()?;
 	}
 	Ok(())

@@ -1,5 +1,7 @@
 use eframe::{epaint::Shadow, Frame};
-use egui::{CentralPanel, Context, Rounding, SidePanel, TopBottomPanel};
+use egui::{
+	CentralPanel, Context, FontFamily, FontId, Rounding, SidePanel, TextStyle, TopBottomPanel,
+};
 use rnalib::AminoString;
 
 mod import_window;
@@ -11,6 +13,9 @@ use protein_selector::ProteinSelector;
 mod fast_text_edit;
 use fast_text_edit::FastTextEdit;
 
+mod protein_viewer;
+use protein_viewer::ProteinViewer;
+
 use crate::{fonts, protein_map::ProteinMap};
 pub type ProteinCollection = ProteinMap;
 
@@ -20,18 +25,12 @@ pub struct App {
 	proteins: ProteinCollection,
 	import_window: ImportWindow,
 	protein_selector: ProteinSelector,
+	protein_viewer: ProteinViewer,
 }
 
 impl App {
 	pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
 		cc.egui_ctx.set_pixels_per_point(1.3);
-
-		let mut style = egui::Style::default();
-		style.visuals.window_shadow = Shadow::small_dark();
-		style.visuals.window_rounding = Rounding::same(3.0);
-		style.animation_time = 0.0;
-
-		cc.egui_ctx.set_style(style);
 
 		let mut fonts = egui::FontDefinitions::default();
 		fonts.font_data.insert(
@@ -47,6 +46,20 @@ impl App {
 			.or_default()
 			.insert(0, "Regular".to_owned());
 		cc.egui_ctx.set_fonts(fonts);
+
+		let font_id = FontId {
+			size: 14.0,
+			family: FontFamily::Proportional,
+		};
+
+		let mut style = egui::Style::default();
+		style.visuals.window_shadow = Shadow::small_dark();
+		style.visuals.window_rounding = Rounding::same(3.0);
+		style.animation_time = 0.0;
+
+		style.text_styles.insert(TextStyle::Heading, font_id);
+
+		cc.egui_ctx.set_style(style);
 
 		Self::default()
 	}
@@ -84,9 +97,18 @@ impl eframe::App for App {
 		SidePanel::left("left_panel")
 			.min_width(300.0)
 			.show(ctx, |ui| {
-				self.protein_selector.show(ui, &self.proteins);
+				if let Some(selection) = self.protein_selector.show(ui, &self.proteins) {
+					self.protein_viewer.protein = Some(selection);
+				}
 			});
 
-		CentralPanel::default().show(ctx, |_| {});
+		CentralPanel::default().show(ctx, |ui| {
+			self.protein_viewer.show(ui);
+			TopBottomPanel::bottom("BOTTOM_DISPLAY")
+				.resizable(true)
+				.show(ctx, |ui| {
+					ui.add_space(ui.available_height());
+				});
+		});
 	}
 }

@@ -51,6 +51,10 @@ impl ProteinMap {
 		Self { proteins }
 	}
 
+	pub fn get_cloned(&self, key: &Key) -> Option<Protein> {
+		self.proteins.get(key).map(ToOwned::to_owned)
+	}
+
 	pub fn keys(&self) -> Keys<Key, Protein> {
 		self.proteins.keys()
 	}

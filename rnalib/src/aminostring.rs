@@ -135,6 +135,13 @@ impl AminoString {
 	}
 }
 
+impl ToOwned for AminoString {
+	type Owned = Self;
+	fn to_owned(&self) -> Self::Owned {
+		AminoString::from(self.codons.clone())
+	}
+}
+
 impl Display for AminoString {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		let codons = self

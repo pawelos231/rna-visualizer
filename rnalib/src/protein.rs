@@ -14,6 +14,15 @@ impl Protein {
 	}
 }
 
+impl ToOwned for Protein {
+	type Owned = Self;
+	fn to_owned(&self) -> Self::Owned {
+		Protein {
+			string: self.string.to_owned(),
+		}
+	}
+}
+
 impl Deref for Protein {
 	type Target = AminoString;
 

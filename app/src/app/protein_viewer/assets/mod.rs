@@ -41,5 +41,11 @@ include_many_lookup!(
 	F, H, I, K, 
 	L, M, N, P,
 	Q, R, S, T,
-	U, V, W, Y
+	U, V, W, Y,
+	G
 );
+
+pub const SUPPORTED_ACIDS: [char; 21] = [
+	'A', 'C', 'D', 'E', 'F', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+	'Y', 'G',
+];

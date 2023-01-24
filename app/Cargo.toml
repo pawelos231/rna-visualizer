@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 rnalib = { path = "../rnalib" }
-rnavis = { path = "../rnavis" }
 egui = "0.20.1"
 eframe = { version = "0.20.0", default-features = false, features = [
 	"default_fonts",
@@ -17,6 +16,11 @@ native-dialog = "0.6.3"
 stringreader = "*"
 mimalloc = { version = "0.1.17", default-features = false }
 utf8-chars = "2.0.3"
+concat-idents = "1.1.4"
+const-str = "0.5.3"
+tiny-skia = "0.6"
+resvg = "0.23.0"
+usvg = "0.23.0"
 
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1"

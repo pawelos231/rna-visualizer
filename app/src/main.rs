@@ -2,7 +2,7 @@
 
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
-const ICON: &[u8] = include_bytes!("./build/icon.bin");
+const ICON: &[u8] = include_bytes!("../icon/icon.bin");
 
 mod app;
 mod fonts;
@@ -17,6 +17,7 @@ fn main() {
 			width: 32,
 			height: 32,
 		}),
+		vsync: true,
 		..Default::default()
 	};
 	eframe::run_native(

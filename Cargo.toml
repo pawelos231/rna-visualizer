@@ -1,8 +1,7 @@
 [workspace]
 members = [
     "app",
-    "rnalib",
-    "rnavis"
+    "rnalib"
 ]
 
 [profile.release]
