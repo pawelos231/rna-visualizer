@@ -32,15 +32,13 @@ impl AminoString {
 		let mut res = Vec::new();
 
 		for index in 0..3.min(source.len()) {
-			let mut codons = Vec::new();
-			codons.reserve(source.len() / 3);
+			let mut codons = Vec::with_capacity(source.len() / 3);
 			source
 				.chars()
 				.skip(index)
 				.filter(|x| *x != ' ')
-				.map(|x| Nucleotide::parse(x).unwrap())
 				.for_each(|x| {
-					temp[temp_idx] = x;
+					temp[temp_idx] = Nucleotide::parse(x).unwrap();
 					temp_idx += 1;
 					if temp_idx == 3 {
 						codons.push(Codon::new(&temp[0], &temp[1], &temp[2]));
