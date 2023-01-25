@@ -1,72 +1,62 @@
-mod svg_cache;
-mod svg_image;
+use std::rc::Rc;
 
 use egui::*;
-use rnalib::*;
-use svg_cache::*;
+
+mod assets;
+pub use assets::*;
+
+mod protein_loader;
+pub use protein_loader::*;
+
+mod acid_painter;
+pub use acid_painter::*;
+
+mod protein_cache;
+pub use protein_cache::*;
+use rnalib::Protein;
 
 #[derive(Default)]
 pub struct ProteinViewer {
 	pub protein: Option<Protein>,
-	assets: SvgCache,
+	cache: ProteinCache,
 }
 
-#[allow(clippy::or_fun_call)]
 impl ProteinViewer {
 	pub fn show(&mut self, ui: &mut Ui) {
-		self.assets.smear_load_svg();
-		let Some(protein) = &self.protein else {
+		if self.protein.is_none() {
 			ui.centered_and_justified(|ui| ui.label("Brak białka do wyświetlenia"));
 			return;
-		};
+		}
 
+		self.show_protein(ui);
+	}
+
+	fn show_protein(&mut self, ui: &mut Ui) {
+		let Some(protein) = &self.protein else { return };
 		ScrollArea::horizontal().show(ui, |ui| {
-			ui.centered_and_justified(|ui| {
+			ui.vertical_centered_justified(|ui| {
 				ui.horizontal(|ui| {
-					let mut codons = protein.get_codons().iter();
-					let mut prev_opt = None;
-					let mut current_opt = codons.next();
+					let mut codon_iter = protein.get_codons().iter();
+					let mut previous = None;
+					let mut current = codon_iter.next();
+					while let Some(codon) = current {
+						let next = codon_iter.next();
 
-					loop {
-						let Some(current) = current_opt else { break };
-						let next = codons.next();
-
-						let base_target = match (prev_opt.is_some(), next.is_some()) {
-							(true, true) => BaseType::NoSide,
-							(false, true) => BaseType::NoRight,
-							(false, false) => BaseType::Default,
-							(true, false) => BaseType::NoLeft,
+						let shorthand = codon.get_acid_shorthand();
+						let cache = &mut self.cache;
+						let base_type = match (previous.is_some(), next.is_some()) {
+							(false, false) => BaseType::BASE,
+							(false, true) => BaseType::BASE_NO_RIGHT,
+							(true, false) => BaseType::BASE_NO_LEFT,
+							(true, true) => BaseType::BASE_NO_SIDES,
 						};
 
-						let Some(base) = &self.assets.get_base(base_target) else {
-							break;
-						};
+						AcidPainter::show(ui, cache, base_type, shorthand);
 
-						let base_bounds = base.get_bounds();
-						let base_bottom_x = base_bounds.get_bottom()[0];
-
-						let scale = 0.33;
-						let shorthand = current.get_acid_shorthand();
-						if let Some(image) = &self.assets.get_acid(shorthand) {
-							let mut rect = base.show_scaled(ui, scale).rect;
-							rect.min.x +=
-								(base_bottom_x - image.get_bounds().get_top()[0]) * scale + 0.3;
-							rect.min.y += 100.0 * scale;
-
-							let clip = ui.clip_rect();
-							ui.set_clip_rect(Rect::NOTHING);
-							let mut next_rect = image.show_scaled(ui, scale).rect;
-							next_rect.min.x -= 50.0 * scale;
-							ui.set_clip_rect(clip);
-
-							ui.allocate_ui_at_rect(rect, |ui| image.show_scaled(ui, scale));
-							ui.allocate_ui_at_rect(next_rect, |_| {});
-						}
-
-						prev_opt = current_opt;
-						current_opt = next;
+						previous = current;
+						current = next;
 					}
-				})
+				});
 			});
 		});
 	}

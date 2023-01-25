@@ -1,7 +1,22 @@
 use concat_idents::concat_idents;
 use const_str::to_char_array;
 
-macro_rules! include_many_lookup {
+macro_rules! include_bases {
+	( $( $name:ident ),* ) => {
+		include_many!($($name),*);
+
+		#[derive(Clone, Copy)]
+		pub enum BaseType { $($name,)* }
+
+		pub fn get_base_svg(base_type: BaseType) -> Option<&'static str> {
+			match base_type {
+				$(BaseType::$name => Some($name),)*
+			}
+		}
+	};
+}
+
+macro_rules! include_bodies {
 	( $( $name:ident ),* ) => {
 		include_many!($($name),*);
 		$(
@@ -10,7 +25,7 @@ macro_rules! include_many_lookup {
 			});
 		)*
 
-		pub fn get_acid_svg_by_shorthand(shorthand: char) -> Option<&'static str> {
+		pub fn get_acid_svg(shorthand: char) -> Option<&'static str> {
 			match shorthand.to_ascii_uppercase() {
 				$(concat_idents!(id = $name , _CHAR { id } ) => Some($name),)*
 				_ => None,
@@ -28,7 +43,7 @@ macro_rules! include_many {
 }
 
 #[rustfmt::skip]
-include_many!(
+include_bases!(
 	BASE,
 	BASE_NO_LEFT,
 	BASE_NO_SIDES,
@@ -39,7 +54,7 @@ include_many!(
 );
 
 #[rustfmt::skip]
-include_many_lookup!(
+include_bodies!(
 	A, C, D, E,
 	F, H, I, K, 
 	L, M, N, P,
