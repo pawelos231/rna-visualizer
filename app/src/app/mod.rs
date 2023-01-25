@@ -103,11 +103,20 @@ impl eframe::App for App {
 			});
 
 		CentralPanel::default().show(ctx, |ui| {
-			self.protein_viewer.show(ui);
-			TopBottomPanel::bottom("BOTTOM_DISPLAY")
+			let available = ui.available_height();
+			let height = TopBottomPanel::top("DISPLAY_TOP")
 				.resizable(true)
 				.show(ctx, |ui| {
-					ui.add_space(ui.available_height());
+					self.protein_viewer.show(ui);
+				})
+				.response
+				.rect
+				.height();
+			TopBottomPanel::bottom("DISPLAY_BOTTOM")
+				.resizable(false)
+				.exact_height(available - height + 25.0)
+				.show(ctx, |ui| {
+					ui.centered_and_justified(|ui| ui.label("Brak danych"));
 				});
 		});
 	}

@@ -8,7 +8,7 @@ pub struct SvgImage {
 	size: [usize; 2],
 	image: Mutex<ColorImage>,
 	texture: Mutex<Option<TextureHandle>>,
-	options: TextureOptions,
+	topmost_node_x: f32,
 }
 
 impl SvgImage {
@@ -17,12 +17,16 @@ impl SvgImage {
 			size: image.size,
 			image: Mutex::new(image),
 			texture: Default::default(),
-			options: Default::default(),
+			topmost_node_x: 0.0,
 		}
 	}
 
 	pub fn from_svg_tree(tree: &Tree) -> Self {
-		Self::from_color_image(load_svg_tree(tree, FitTo::Original).unwrap())
+		let tree_data = load_svg_tree(tree).unwrap();
+		Self {
+			topmost_node_x: tree_data.1,
+			..Self::from_color_image(tree_data.0)
+		}
 	}
 
 	pub fn get_size(&self) -> [usize; 2] {
@@ -37,6 +41,10 @@ impl SvgImage {
 		self.size[1]
 	}
 
+	pub fn get_topmost_node_x(&self) -> f32 {
+		self.topmost_node_x
+	}
+
 	pub fn get_size_vec2(&self) -> Vec2 {
 		let [w, h] = self.get_size();
 		vec2(w as f32, h as f32)
@@ -48,7 +56,7 @@ impl SvgImage {
 			.get_or_insert_with(|| {
 				let image: &mut ColorImage = &mut self.image.lock();
 				let image = std::mem::take(image);
-				ctx.load_texture("", image, self.options)
+				ctx.load_texture("", image, TextureOptions::default())
 			})
 			.id()
 	}
@@ -66,25 +74,45 @@ impl SvgImage {
 	}
 }
 
-pub fn load_svg_tree(tree: &Tree, fit_to: FitTo) -> Result<ColorImage, String> {
+fn load_svg_tree(tree: &Tree) -> Result<(ColorImage, f32), String> {
 	let mut opt = Options::default();
 	opt.fontdb.load_system_fonts();
 
 	let pixmap_size = tree.svg_node().size.to_screen_size();
-	let width = pixmap_size.width() as f32;
-	let height = pixmap_size.height() as f32;
-	let [w, h] = match fit_to {
-		FitTo::Original => [width as u32, height as u32],
-		FitTo::Size(w, h) => [w, h],
-		FitTo::Height(h) => [(width * (h as f32 / height)) as u32, h],
-		FitTo::Width(w) => [w, (height * (w as f32 / width)) as u32],
-		FitTo::Zoom(z) => [(width * z) as u32, (height * z) as u32],
-	};
+	let width = pixmap_size.width() as u32;
+	let height = pixmap_size.height() as u32;
 
-	let mut pixmap = Pixmap::new(w, h).unwrap();
-	render(tree, fit_to, Default::default(), pixmap.as_mut()).unwrap();
+	let mut pixmap = Pixmap::new(width, height).unwrap();
+	render(tree, FitTo::Original, Default::default(), pixmap.as_mut()).unwrap();
 
-	let image = ColorImage::from_rgba_unmultiplied([w as _, h as _], pixmap.data());
+	let image = ColorImage::from_rgba_unmultiplied([width as _, height as _], pixmap.data());
 
-	Ok(image)
+	Ok((image, find_topmost_node(&tree.root()).0 as f32))
+}
+
+fn find_topmost_node(node: &Node) -> (f64, f64) {
+	use PathSegment::*;
+	let mut top_x = 0f64;
+	let mut top_y = f64::MAX;
+	for node in node.children() {
+		let readable = node.borrow().clone();
+		if let NodeKind::Path(path) = readable {
+			for segment in &path.data.0 {
+				match segment {
+					MoveTo { x, y } | LineTo { x, y } => {
+						if *y < top_y {
+							top_x = *x;
+							top_y = *y;
+						}
+					}
+					_ => {}
+				};
+			}
+		}
+		let next = find_topmost_node(&node);
+		if next.1 < top_y {
+			(top_x, top_y) = next;
+		}
+	}
+	(top_x, top_y)
 }
