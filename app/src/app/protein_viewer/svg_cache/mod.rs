@@ -15,10 +15,16 @@ pub struct SvgCache {
 	base_link: Option<SvgImage>,
 	base_p: Option<SvgImage>,
 	base_p_link: Option<SvgImage>,
+	base_no_left: Option<SvgImage>,
+	base_no_right: Option<SvgImage>,
+	base_no_sides: Option<SvgImage>,
 }
 
 pub enum BaseType {
 	Default,
+	NoLeft,
+	NoRight,
+	NoSide,
 	_Link,
 	_P,
 	_PLink,
@@ -57,6 +63,21 @@ impl SvgCache {
 			let svg = Self::process_svg(BASE_P_LINK);
 			self.base_p_link = Some(SvgImage::from_svg_tree(&svg));
 		}
+
+		if self.base_no_left.is_none() {
+			let svg = Self::process_svg(BASE_NO_LEFT);
+			self.base_no_left = Some(SvgImage::from_svg_tree(&svg));
+		}
+
+		if self.base_no_right.is_none() {
+			let svg = Self::process_svg(BASE_NO_RIGHT);
+			self.base_no_right = Some(SvgImage::from_svg_tree(&svg));
+		}
+
+		if self.base_no_sides.is_none() {
+			let svg = Self::process_svg(BASE_NO_SIDES);
+			self.base_no_sides = Some(SvgImage::from_svg_tree(&svg));
+		}
 	}
 
 	pub fn get_acid(&self, shorthand: char) -> Option<&SvgImage> {
@@ -64,11 +85,15 @@ impl SvgCache {
 	}
 
 	pub fn get_base(&self, base_type: BaseType) -> Option<&SvgImage> {
+		use BaseType::*;
 		match base_type {
-			BaseType::Default => &self.base,
-			BaseType::_Link => &self.base_link,
-			BaseType::_P => &self.base_p,
-			BaseType::_PLink => &self.base_p_link,
+			Default => &self.base,
+			NoLeft => &self.base_no_left,
+			NoSide => &self.base_no_sides,
+			NoRight => &self.base_no_right,
+			_Link => &self.base_link,
+			_P => &self.base_p,
+			_PLink => &self.base_p_link,
 		}
 		.as_ref()
 	}
