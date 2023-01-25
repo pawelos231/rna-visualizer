@@ -30,10 +30,7 @@ impl ProteinViewer {
 						let Some(current) = current_opt else { break };
 						let next = codons.next();
 
-						let Some(base) = &self.assets.get_base(match next {
-							Some(_) => BaseType::Default,
-							None => BaseType::P
-						}) else {
+						let Some(base) = &self.assets.get_base(BaseType::Default) else {
 							break;
 						};
 

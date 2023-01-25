@@ -33,11 +33,11 @@ impl SvgImage {
 		self.size
 	}
 
-	pub fn get_width(&self) -> usize {
+	pub fn _get_width(&self) -> usize {
 		self.size[0]
 	}
 
-	pub fn get_height(&self) -> usize {
+	pub fn _get_height(&self) -> usize {
 		self.size[1]
 	}
 
@@ -61,7 +61,7 @@ impl SvgImage {
 			.id()
 	}
 
-	pub fn show(&self, ui: &mut Ui) -> Response {
+	pub fn _show(&self, ui: &mut Ui) -> Response {
 		self.show_size(ui, self.get_size_vec2())
 	}
 
@@ -79,8 +79,8 @@ fn load_svg_tree(tree: &Tree) -> Result<(ColorImage, f32), String> {
 	opt.fontdb.load_system_fonts();
 
 	let pixmap_size = tree.svg_node().size.to_screen_size();
-	let width = pixmap_size.width() as u32;
-	let height = pixmap_size.height() as u32;
+	let width = pixmap_size.width();
+	let height = pixmap_size.height();
 
 	let mut pixmap = Pixmap::new(width, height).unwrap();
 	render(tree, FitTo::Original, Default::default(), pixmap.as_mut()).unwrap();

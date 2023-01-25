@@ -19,16 +19,17 @@ pub struct SvgCache {
 
 pub enum BaseType {
 	Default,
-	Link,
-	P,
-	PLink,
+	_Link,
+	_P,
+	_PLink,
 }
 
 impl SvgCache {
 	pub fn smear_load_svg(&mut self) {
 		for acid_shorthand in SUPPORTED_ACIDS {
 			if let Entry::Vacant(entry) = self.protein_svgs.entry(acid_shorthand) {
-				let svg = Self::process_svg(get_acid_svg_by_shorthand(acid_shorthand).unwrap());
+				let svg_src = get_acid_svg_by_shorthand(acid_shorthand).unwrap();
+				let svg = Self::process_svg(svg_src);
 				entry.insert(SvgImage::from_svg_tree(&svg));
 				return;
 			}
@@ -65,9 +66,9 @@ impl SvgCache {
 	pub fn get_base(&self, base_type: BaseType) -> Option<&SvgImage> {
 		match base_type {
 			BaseType::Default => &self.base,
-			BaseType::Link => &self.base_link,
-			BaseType::P => &self.base_p,
-			BaseType::PLink => &self.base_p_link,
+			BaseType::_Link => &self.base_link,
+			BaseType::_P => &self.base_p,
+			BaseType::_PLink => &self.base_p_link,
 		}
 		.as_ref()
 	}
@@ -104,9 +105,7 @@ impl SvgCache {
 		}
 
 		let document = Tree::from_str(data, &options.to_ref()).unwrap();
-		for node in document.root().children() {
-			process_node(node);
-		}
+		process_node(document.root());
 
 		document
 	}
