@@ -85,9 +85,10 @@ impl ProteinMap {
 		let mut protein = false;
 
 		let mut iter = source
-			.bytes()
-			.filter(|&x| x != SPACE)
-			.map(Nucleotide::parse_raw);
+			.as_bytes()
+			.iter()
+			.filter(|&&x| x != SPACE)
+			.map(|&x| Nucleotide::parse_raw(x));
 
 		for _ in 0..skip {
 			iter.next();
@@ -97,7 +98,7 @@ impl ProteinMap {
 			let codon = Codon::new(a, b, c);
 			let acid = codon.get_acid_shorthand_raw();
 
-			if acid == STOP && protein {
+			if protein && acid == STOP {
 				if !current.is_empty() {
 					result.insert(Key(current.to_string()), current.clone());
 					current.get_codons_mut().clear();
@@ -113,6 +114,7 @@ impl ProteinMap {
 				protein = true;
 			}
 		}
+
 		result
 	}
 

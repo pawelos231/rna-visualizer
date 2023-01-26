@@ -127,7 +127,7 @@ impl AminoString {
 			}
 
 			if protein {
-				current.push(codon.clone());
+				current.push(*codon);
 			}
 
 			if acid == Codon::START {

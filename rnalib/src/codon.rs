@@ -2,7 +2,7 @@ use std::fmt::{Display, Write};
 
 use crate::{Acid, Nucleotide};
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Codon {
 	shorthand: u8,
 }
