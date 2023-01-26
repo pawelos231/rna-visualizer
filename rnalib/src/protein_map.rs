@@ -60,9 +60,9 @@ impl ProteinMap {
 
 		scope(|scope| {
 			let threads = [
+				scope.spawn(|| Self::load_skip(source, 0)),
 				scope.spawn(|| Self::load_skip(source, 1)),
 				scope.spawn(|| Self::load_skip(source, 2)),
-				scope.spawn(|| Self::load_skip(source, 3)),
 			];
 
 			for thread in threads {
@@ -83,13 +83,18 @@ impl ProteinMap {
 		let mut result = BTreeMap::new();
 		let mut current = Protein::from(Vec::with_capacity(30000));
 		let mut protein = false;
+
 		let mut iter = source
 			.bytes()
-			.skip(skip)
-			.filter(|x| *x != SPACE)
-			.map(|x| Nucleotide::parse_raw(x).unwrap());
+			.filter(|&x| x != SPACE)
+			.map(Nucleotide::parse_raw);
+
+		for _ in 0..skip {
+			iter.next();
+		}
+
 		while let (Some(a), Some(b), Some(c)) = (iter.next(), iter.next(), iter.next()) {
-			let codon = Codon::new(&a, &b, &c);
+			let codon = Codon::new(a, b, c);
 			let acid = codon.get_acid_shorthand_raw();
 
 			if acid == STOP && protein {
@@ -101,7 +106,7 @@ impl ProteinMap {
 			}
 
 			if protein {
-				current.push(codon.clone());
+				current.push(codon);
 			}
 
 			if acid == START {

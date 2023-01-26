@@ -20,14 +20,14 @@ impl Nucleotide {
 		}
 	}
 
-	pub const fn parse_raw(from: u8) -> Option<Self> {
+	pub const fn parse_raw(from: u8) -> Self {
 		use Nucleotide::*;
 		match from {
-			b'G' | b'g' => Some(G),
-			b'U' | b'T' | b'u' | b't' => Some(U),
-			b'A' | b'a' => Some(A),
-			b'C' | b'c' => Some(C),
-			_ => None,
+			b'G' | b'g' => G,
+			b'U' | b'T' | b'u' | b't' => U,
+			b'A' | b'a' => A,
+			b'C' | b'c' => C,
+			_ => panic!("Unsupported raw input"),
 		}
 	}
 }

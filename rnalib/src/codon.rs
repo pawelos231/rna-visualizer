@@ -11,38 +11,38 @@ impl Codon {
 	pub const STOP: char = '_';
 	pub const START: char = 'M';
 
-	pub const fn new(a: &Nucleotide, b: &Nucleotide, c: &Nucleotide) -> Self {
+	pub const fn new(a: Nucleotide, b: Nucleotide, c: Nucleotide) -> Self {
 		use Nucleotide::*;
 		let shorthand = match (a, b, c) {
-			(U, U, U | C) => 'F',
-			(U, U, A | G) => 'L',
-			(U, C, _) => 'S',
-			(U, A, U | C) => 'Y',
-			(U, A, A | G) => Self::STOP,
-			(U, G, U | C) => 'C',
-			(U, G, A) => Self::STOP,
-			(U, G, G) => 'W',
+			(U, U, U | C) => b'F',
+			(U, U, A | G) => b'L',
+			(U, C, _) => b'S',
+			(U, A, U | C) => b'Y',
+			(U, A, A | G) => Self::STOP as u8,
+			(U, G, U | C) => b'C',
+			(U, G, A) => Self::STOP as u8,
+			(U, G, G) => b'W',
 
-			(C, U, _) => 'L',
-			(C, C, _) => 'P',
-			(C, A, U | C) => 'H',
-			(C, A, A | G) => 'Q',
-			(C, G, _) => 'R',
+			(C, U, _) => b'L',
+			(C, C, _) => b'P',
+			(C, A, U | C) => b'H',
+			(C, A, A | G) => b'Q',
+			(C, G, _) => b'R',
 
-			(A, U, A | C | U) => 'I',
-			(A, U, G) => Self::START,
-			(A, C, _) => 'T',
-			(A, A, C | U) => 'N',
-			(A, A, G | A) => 'K',
-			(A, G, C | U) => 'S',
-			(A, G, A | G) => 'R',
+			(A, U, A | C | U) => b'I',
+			(A, U, G) => Self::START as u8,
+			(A, C, _) => b'T',
+			(A, A, C | U) => b'N',
+			(A, A, G | A) => b'K',
+			(A, G, C | U) => b'S',
+			(A, G, A | G) => b'R',
 
-			(G, U, _) => 'V',
-			(G, C, _) => 'A',
-			(G, A, U | C) => 'D',
-			(G, A, A | G) => 'E',
-			(G, G, _) => 'G',
-		} as u8;
+			(G, U, _) => b'V',
+			(G, C, _) => b'A',
+			(G, A, U | C) => b'D',
+			(G, A, A | G) => b'E',
+			(G, G, _) => b'G',
+		};
 		Self { shorthand }
 	}
 

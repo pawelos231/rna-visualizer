@@ -1,7 +1,10 @@
 // #![windows_subsystem = "windows"]
 
+use mimalloc::MiMalloc;
+
 #[global_allocator]
-static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+static GLOBAL: MiMalloc = MiMalloc;
+
 const ICON: &[u8] = include_bytes!("../icon/icon.bin");
 
 mod app;

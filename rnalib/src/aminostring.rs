@@ -1,7 +1,6 @@
 use std::fmt::Display;
 
 use crate::{Bases, Codon, Nucleotide, Protein};
-use itertools::Itertools;
 
 #[derive(Default, Clone)]
 pub struct AminoString {
@@ -41,7 +40,7 @@ impl AminoString {
 					temp[temp_idx] = Nucleotide::parse(x).unwrap();
 					temp_idx += 1;
 					if temp_idx == 3 {
-						codons.push(Codon::new(&temp[0], &temp[1], &temp[2]));
+						codons.push(Codon::new(temp[0], temp[1], temp[2]));
 						temp_idx = 0;
 					}
 				});
@@ -141,11 +140,13 @@ impl AminoString {
 
 impl Display for AminoString {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		let codons = self
-			.codons
-			.iter()
-			.map(|x| x.get_acid_shorthand())
-			.join(", ");
-		f.write_str(&format!("[{codons}]"))
+		write!(f, "[")?;
+		for (count, v) in self.codons.iter().enumerate() {
+			if count != 0 {
+				write!(f, ", ")?;
+			}
+			write!(f, "{}", v)?;
+		}
+		write!(f, "]")
 	}
 }
