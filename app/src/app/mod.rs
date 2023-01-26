@@ -2,7 +2,7 @@ use eframe::{epaint::Shadow, Frame};
 use egui::{
 	CentralPanel, Context, FontFamily, FontId, Rounding, SidePanel, TextStyle, TopBottomPanel,
 };
-use rnalib::AminoString;
+use rnalib::ProteinMap;
 
 mod import_window;
 use import_window::ImportWindow;
@@ -18,7 +18,7 @@ use protein_viewer::ProteinViewer;
 
 mod svg_image;
 
-use crate::{fonts, protein_map::ProteinMap};
+use crate::fonts;
 pub type ProteinCollection = ProteinMap;
 
 #[derive(Default)]
@@ -79,11 +79,7 @@ impl eframe::App for App {
 				ui.label("Ciąg RNA:");
 				FastTextEdit::singleline(ui, &mut self.rna);
 				if ui.button("Wczytaj").clicked() {
-					let mut proteins = Vec::new();
-					for amino in AminoString::parse(&self.rna) {
-						proteins.append(&mut amino.get_proteins());
-					}
-					self.proteins = ProteinMap::new(proteins);
+					self.proteins = ProteinMap::parse_multithreaded(&self.rna);
 				};
 				if ui.button("Wytnij niepoprawne znaki").clicked() {
 					self.rna

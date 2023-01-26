@@ -1,7 +1,11 @@
-use std::{fmt::Display, ops::Deref};
+use std::{
+	fmt::Display,
+	ops::{Deref, DerefMut},
+};
 
 use crate::{AminoString, Codon};
 
+#[derive(Clone)]
 pub struct Protein {
 	string: AminoString,
 }
@@ -14,20 +18,17 @@ impl Protein {
 	}
 }
 
-impl ToOwned for Protein {
-	type Owned = Self;
-	fn to_owned(&self) -> Self::Owned {
-		Protein {
-			string: self.string.to_owned(),
-		}
-	}
-}
-
 impl Deref for Protein {
 	type Target = AminoString;
 
 	fn deref(&self) -> &Self::Target {
 		&self.string
+	}
+}
+
+impl DerefMut for Protein {
+	fn deref_mut(&mut self) -> &mut Self::Target {
+		&mut self.string
 	}
 }
 

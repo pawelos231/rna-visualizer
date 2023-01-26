@@ -3,7 +3,7 @@ use std::fmt::Display;
 use crate::{Bases, Codon, Nucleotide, Protein};
 use itertools::Itertools;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct AminoString {
 	codons: Vec<Codon>,
 }
@@ -53,6 +53,10 @@ impl AminoString {
 
 	pub fn get_codons(&self) -> &Vec<Codon> {
 		&self.codons
+	}
+
+	pub fn get_codons_mut(&mut self) -> &mut Vec<Codon> {
+		&mut self.codons
 	}
 
 	pub fn get_mass(&self) -> f32 {
@@ -132,13 +136,6 @@ impl AminoString {
 			}
 		}
 		result
-	}
-}
-
-impl ToOwned for AminoString {
-	type Owned = Self;
-	fn to_owned(&self) -> Self::Owned {
-		AminoString::from(self.codons.clone())
 	}
 }
 

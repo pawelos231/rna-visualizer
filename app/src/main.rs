@@ -6,7 +6,6 @@ const ICON: &[u8] = include_bytes!("../icon/icon.bin");
 
 mod app;
 mod fonts;
-mod protein_map;
 
 use app::*;
 

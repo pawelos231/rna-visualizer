@@ -1,6 +1,6 @@
 use std::fmt::{Display, Write};
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum Nucleotide {
 	G,
 	U,
@@ -16,6 +16,17 @@ impl Nucleotide {
 			'U' | 'T' | 'u' | 't' => Some(U),
 			'A' | 'a' => Some(A),
 			'C' | 'c' => Some(C),
+			_ => None,
+		}
+	}
+
+	pub const fn parse_raw(from: u8) -> Option<Self> {
+		use Nucleotide::*;
+		match from {
+			b'G' | b'g' => Some(G),
+			b'U' | b'T' | b'u' | b't' => Some(U),
+			b'A' | b'a' => Some(A),
+			b'C' | b'c' => Some(C),
 			_ => None,
 		}
 	}

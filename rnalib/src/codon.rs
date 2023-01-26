@@ -53,6 +53,10 @@ impl Codon {
 	pub const fn get_acid_shorthand(&self) -> char {
 		self.shorthand as char
 	}
+
+	pub const fn get_acid_shorthand_raw(&self) -> u8 {
+		self.shorthand
+	}
 }
 
 impl Display for Codon {
