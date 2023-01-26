@@ -17,7 +17,6 @@ mod protein_viewer;
 use protein_viewer::ProteinViewer;
 
 mod svg_image;
-use svg_image::*;
 
 use crate::{fonts, protein_map::ProteinMap};
 pub type ProteinCollection = ProteinMap;

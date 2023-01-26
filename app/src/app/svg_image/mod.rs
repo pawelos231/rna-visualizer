@@ -24,14 +24,6 @@ impl SvgImage {
 		self.size
 	}
 
-	pub fn get_width(&self) -> usize {
-		self.size[0]
-	}
-
-	pub fn get_height(&self) -> usize {
-		self.size[1]
-	}
-
 	pub fn get_bounds(&self) -> &SvgBounds {
 		&self.bounds
 	}
@@ -52,11 +44,7 @@ impl SvgImage {
 			.id()
 	}
 
-	pub fn show(&self, ui: &mut Ui) -> Response {
-		self.show_size(ui, self.get_size_vec2())
-	}
-
-	pub fn show_scaled(&self, ui: &mut Ui, scale: f32) -> Response {
+	pub fn show(&self, ui: &mut Ui, scale: f32) -> Response {
 		self.show_size(ui, self.get_size_vec2() * scale)
 	}
 

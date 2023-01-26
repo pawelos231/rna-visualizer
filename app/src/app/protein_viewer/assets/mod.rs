@@ -6,6 +6,8 @@ macro_rules! include_bases {
 		include_many!($($name),*);
 
 		#[derive(Clone, Copy)]
+		#[allow(non_camel_case_types)]
+		#[allow(clippy::upper_case_acronyms)]
 		pub enum BaseType { $($name,)* }
 
 		pub fn get_base_svg(base_type: BaseType) -> Option<&'static str> {
@@ -47,10 +49,10 @@ include_bases!(
 	BASE,
 	BASE_NO_LEFT,
 	BASE_NO_SIDES,
-	BASE_NO_RIGHT,
-	BASE_LINK,
+	BASE_NO_RIGHT
+	/*BASE_LINK,
 	BASE_P_LINK,
-	BASE_P
+	BASE_P*/
 );
 
 #[rustfmt::skip]
@@ -62,8 +64,3 @@ include_bodies!(
 	U, V, W, Y,
 	G
 );
-
-pub const SUPPORTED_ACIDS: [char; 21] = [
-	'A', 'C', 'D', 'E', 'F', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
-	'Y', 'G',
-];

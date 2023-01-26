@@ -5,7 +5,7 @@ use super::*;
 pub struct AcidPainter;
 
 impl AcidPainter {
-	const ACID_SCALE: f32 = 0.33;
+	const ACID_SCALE: f32 = 0.36;
 
 	pub fn show(ui: &mut Ui, cache: &mut ProteinCache, base_type: BaseType, shorthand: char) {
 		cache.lazy_load(shorthand);
@@ -14,18 +14,28 @@ impl AcidPainter {
 		let Some(base) = cache.get_base(base_type) else { return };
 		let Some(body) = cache.get(shorthand) else { return };
 
-		let base_bottom = body.get_bounds().get_bottom()[0];
-		let body_top = base.get_bounds().get_top()[0];
-
 		let base_size = base.get_size_vec2() * Self::ACID_SCALE;
-		let base_rect = base.show_scaled(ui, Self::ACID_SCALE).rect;
-		let mut body_rect = base_rect;
-		// body_rect.min.x += base_bottom;
-		body_rect.min.y += base_size.y;
-		body_rect.max.x = body_rect.min.x;
-		ui.allocate_rect(body_rect, Sense::hover());
-		body.show_scaled(ui, Self::ACID_SCALE);
-		ui.allocate_ui_at_rect(base_rect, |_| {});
-		ui.add_space(base_size.x);
+
+		let body_top = body.get_bounds().get_top()[0] * Self::ACID_SCALE;
+
+		let offset = match base_type {
+			BaseType::BASE | BaseType::BASE_NO_RIGHT => 100.0,
+			_ => 36.0,
+		} * Self::ACID_SCALE;
+
+		let mut width = 0.0;
+		let more_width = ui
+			.vertical(|ui| {
+				width = base.show(ui, Self::ACID_SCALE).rect.width();
+				ui.add_space(-base_size.y + 96.0 * Self::ACID_SCALE);
+				ui.horizontal(|ui| {
+					ui.add_space(-body_top + offset);
+					body.show(ui, Self::ACID_SCALE);
+				});
+			})
+			.response
+			.rect
+			.width();
+		ui.add_space(f32::max(width - more_width, 0.0) - 4.0);
 	}
 }
