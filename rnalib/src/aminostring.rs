@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::{Bases, Codon, Nucleotide, Protein};
+use crate::{Acids, Bases, Codon, Nucleotide, Protein};
 
 #[derive(Default, Clone)]
 pub struct AminoString {
@@ -11,7 +11,7 @@ impl AminoString {
 	pub const fn from(codons: Vec<Codon>) -> Self {
 		Self { codons }
 	}
-
+	//Helper methods
 	pub fn push(&mut self, codon: Codon) {
 		self.codons.push(codon);
 	}
@@ -23,33 +23,6 @@ impl AminoString {
 	pub fn is_empty(&self) -> bool {
 		self.codons.len() == 0
 	}
-
-	pub fn parse(source: &str) -> Vec<Self> {
-		let mut temp = [Nucleotide::A, Nucleotide::A, Nucleotide::A];
-		let mut temp_idx = 0;
-
-		let mut res = Vec::new();
-
-		for index in 0..3.min(source.len()) {
-			let mut codons = Vec::with_capacity(source.len() / 3);
-			source
-				.chars()
-				.skip(index)
-				.filter(|x| *x != ' ')
-				.for_each(|x| {
-					temp[temp_idx] = Nucleotide::parse(x).unwrap();
-					temp_idx += 1;
-					if temp_idx == 3 {
-						codons.push(Codon::new(temp[0], temp[1], temp[2]));
-						temp_idx = 0;
-					}
-				});
-			res.push(AminoString::from(codons));
-			temp_idx = 0;
-		}
-		res
-	}
-
 	pub fn get_codons(&self) -> &Vec<Codon> {
 		&self.codons
 	}
@@ -57,6 +30,14 @@ impl AminoString {
 	pub fn get_codons_mut(&mut self) -> &mut Vec<Codon> {
 		&mut self.codons
 	}
+	pub fn get_first(&self) -> Codon {
+		self.codons[0]
+	}
+	pub fn get_last(&self) -> Codon {
+		return self.codons[self.len() - 1];
+	}
+
+	//Calculate physical properties of protein
 
 	pub fn get_mass(&self) -> f32 {
 		let codon_len = self.codons.len() as f32;
@@ -72,8 +53,10 @@ impl AminoString {
 	}
 
 	pub fn get_isoletric_point(&self) {
-		let net_val = Bases::init_bases().k;
-		println!("{}", net_val)
+		let bases = Bases::init_bases(&self.get_last().get_acid().unwrap().pk2);
+		let acids = Acids::init_acids(&self.get_first().get_acid().unwrap().pk1);
+
+		println!("{}", "siema");
 	}
 
 	pub fn net_charge(&self) -> f32 {
@@ -108,6 +91,32 @@ impl AminoString {
 
 	pub fn get_polarity(&self) -> f32 {
 		0.5
+	}
+
+	pub fn parse(source: &str) -> Vec<Self> {
+		let mut temp = [Nucleotide::A, Nucleotide::A, Nucleotide::A];
+		let mut temp_idx = 0;
+
+		let mut res = Vec::new();
+
+		for index in 0..3.min(source.len()) {
+			let mut codons = Vec::with_capacity(source.len() / 3);
+			source
+				.chars()
+				.skip(index)
+				.filter(|x| *x != ' ')
+				.for_each(|x| {
+					temp[temp_idx] = Nucleotide::parse(x).unwrap();
+					temp_idx += 1;
+					if temp_idx == 3 {
+						codons.push(Codon::new(temp[0], temp[1], temp[2]));
+						temp_idx = 0;
+					}
+				});
+			res.push(AminoString::from(codons));
+			temp_idx = 0;
+		}
+		res
 	}
 
 	pub fn get_proteins(&self) -> Vec<Protein> {

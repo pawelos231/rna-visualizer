@@ -1,7 +1,6 @@
 // #![windows_subsystem = "windows"]
 
 use mimalloc::MiMalloc;
-
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 
@@ -22,6 +21,7 @@ fn main() {
 		vsync: true,
 		..Default::default()
 	};
+
 	eframe::run_native(
 		"Motorola Science Cup 2022/23 - Bioinformatyka",
 		native_options,
