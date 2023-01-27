@@ -49,10 +49,8 @@ include_bases!(
 	BASE,
 	BASE_NO_LEFT,
 	BASE_NO_SIDES,
-	BASE_NO_RIGHT
-	/*BASE_LINK,
-	BASE_P_LINK,
-	BASE_P*/
+	BASE_NO_RIGHT,
+	BASE_LINK
 );
 
 #[rustfmt::skip]

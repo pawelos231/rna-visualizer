@@ -52,6 +52,14 @@ impl SvgImage {
 		ui.image(self.texture_id(ui.ctx()), desired_size)
 	}
 
+	pub fn show_no_alloc(&self, ui: &mut Ui, scale: f32) {
+		let size = self.get_size_vec2();
+		egui::Image::new(self.texture_id(ui.ctx()), size).paint_at(
+			ui,
+			egui::Rect::from_min_size(ui.next_widget_position(), size * scale),
+		)
+	}
+
 	fn from_svg_data(data: SvgData) -> Self {
 		Self {
 			size: data.image.size,

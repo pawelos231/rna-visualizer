@@ -36,13 +36,16 @@ impl ProteinViewer {
 
 	fn show_protein(&mut self, ui: &mut Ui) {
 		let Some(protein) = &self.protein else { return };
-		ScrollArea::horizontal().show(ui, |ui| {
-			Extras::center_vert_with_margins(ui, &mut |ui| {
+		ScrollArea::horizontal()
+			.auto_shrink([false, false])
+			.show(ui, |ui| {
+				ui.add_space(ui.available_height() / 2.0 - 60.0 * self.painter.scale);
 				ui.horizontal(|ui| {
 					let mut codon_iter = protein.get_codons().iter();
 					let mut previous = None;
 					let mut current = codon_iter.next();
 
+					self.painter.flip = false;
 					while let Some(codon) = current {
 						let next = codon_iter.next();
 
@@ -55,13 +58,14 @@ impl ProteinViewer {
 							(true, true) => BaseType::BASE_NO_SIDES,
 						};
 
-						self.painter.show(ui, cache, base_type, shorthand);
+						self.painter
+							.show(ui, cache, base_type, shorthand, next.is_some());
 
 						previous = current;
 						current = next;
 					}
 				});
+				ui.add_space(ui.available_height());
 			});
-		});
 	}
 }
