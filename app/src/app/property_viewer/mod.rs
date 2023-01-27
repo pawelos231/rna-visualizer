@@ -42,7 +42,7 @@ impl PropertyViewer {
 					} else {
 						ui.horizontal(|ui| {
 							ui.centered_and_justified(|ui| {
-								ui.label("Brak danych :C");
+								ui.label("Brak danych ☹");
 							});
 						});
 					}

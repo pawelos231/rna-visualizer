@@ -123,6 +123,10 @@ impl ProteinMap {
 		self.proteins.get(key).map(|x| Rc::new(x.clone()))
 	}
 
+	pub fn get_by_string(&self, key: String) -> Option<Rc<Protein>> {
+		self.proteins.get(&Key(key)).map(|x| Rc::new(x.clone()))
+	}
+
 	pub fn keys(&self) -> Keys<Key, Protein> {
 		self.proteins.keys()
 	}

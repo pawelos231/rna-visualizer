@@ -10,10 +10,12 @@ type ProteinCollection = super::ProteinMap;
 #[derive(Default)]
 pub struct ProteinSelector {
 	page: usize,
+	last_render_page: usize,
+	paginated: Vec<String>,
 }
 
 impl ProteinSelector {
-	const PAGINATION: usize = 100;
+	const PAGINATION: usize = 200;
 
 	pub fn show(&mut self, ui: &mut Ui, proteins: &ProteinCollection) -> Option<Rc<Protein>> {
 		let mut result = None;
@@ -27,10 +29,29 @@ impl ProteinSelector {
 		result
 	}
 
+	pub fn clear_cache(&mut self) {
+		self.page = 0;
+		self.paginated.clear();
+	}
+
 	fn show_empty_message(&self, ui: &mut Ui, proteins: &ProteinCollection) {
 		if proteins.keys().len() == 0 {
 			ui.centered_and_justified(|ui| ui.label("Brak białek do wyświetlenia"));
 		};
+	}
+
+	fn update_pagination(&mut self, proteins: &ProteinCollection) {
+		self.paginated.clear();
+		self.last_render_page = self.page;
+
+		let mut iter = proteins.keys();
+		for _ in 0..self.page * Self::PAGINATION {
+			iter.next();
+		}
+
+		for protein in iter.take(Self::PAGINATION) {
+			self.paginated.push(protein.0.clone());
+		}
 	}
 
 	fn show_pagination_header(&mut self, ui: &mut Ui, proteins: &ProteinCollection) {
@@ -63,8 +84,6 @@ impl ProteinSelector {
 				if ui.button(">").clicked() {
 					self.page += 1;
 				}
-
-				self.page = self.page.min(pages);
 			});
 			ui.add_space(7.0);
 		} else {
@@ -79,11 +98,15 @@ impl ProteinSelector {
 		min_y: f32,
 		max_y: f32,
 	) -> Option<Rc<Protein>> {
+		self.page = self.page.min(proteins.keys().len() / Self::PAGINATION);
+		if self.last_render_page != self.page || self.paginated.is_empty() {
+			self.update_pagination(proteins);
+		}
+
 		let mut result = None;
 		let button_width = ui.available_width();
-		let iter = proteins.keys().skip(self.page * Self::PAGINATION);
-		for protein in iter.take(Self::PAGINATION) {
-			let stringed = &protein.0;
+
+		for stringed in &self.paginated {
 			let old_clip_rect = ui.clip_rect();
 
 			let cursor = ui.cursor().min.y;
@@ -105,7 +128,7 @@ impl ProteinSelector {
 					.add_sized([button_width, 30.], Button::new(stringed))
 					.clicked()
 				{
-					result = proteins.get(protein);
+					result = proteins.get_by_string(stringed.clone());
 				}
 			});
 

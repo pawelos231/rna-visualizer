@@ -88,6 +88,7 @@ impl eframe::App for App {
 				FastTextEdit::singleline(ui, &mut self.rna);
 				if ui.button("Wczytaj").clicked() {
 					self.proteins = ProteinMap::parse_multithreaded(&self.rna);
+					self.protein_selector.clear_cache();
 				};
 				if ui.button("Wytnij niepoprawne znaki").clicked() {
 					self.rna

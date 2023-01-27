@@ -50,7 +50,19 @@ impl SvgImage {
 	}
 
 	pub fn show_size(&self, ui: &mut Ui, desired_size: Vec2) -> Response {
-		ui.image(self.texture_id(ui.ctx()), desired_size)
+		let (rect, response) = ui.allocate_exact_size(desired_size, Sense::hover());
+		{
+			if ui.is_rect_visible(egui::Rect::from_two_pos(rect.min, rect.max)) {
+				let mut mesh = Mesh::with_texture(self.texture_id(ui.ctx()));
+				mesh.add_rect_with_uv(
+					rect,
+					egui::Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)),
+					Color32::WHITE,
+				);
+				ui.painter().add(Shape::mesh(mesh));
+			}
+		}
+		response
 	}
 
 	pub fn show_no_alloc(&self, ui: &mut Ui, scale: f32) {
