@@ -7,6 +7,7 @@ use usvg::*;
 mod svg_bounds;
 use svg_bounds::SvgBounds;
 
+#[derive(Clone)]
 pub struct SvgImage {
 	size: [usize; 2],
 	image: Mutex<ColorImage>,

@@ -10,6 +10,8 @@ macro_rules! include_bases {
 		#[allow(clippy::upper_case_acronyms)]
 		pub enum BaseType { $($name,)* }
 
+		pub const BASES: [BaseType; 5] = [$(BaseType::$name),*];
+
 		pub fn get_base_svg(base_type: BaseType) -> Option<&'static str> {
 			match base_type {
 				$(BaseType::$name => Some($name),)*

@@ -26,6 +26,8 @@ pub struct ProteinViewer {
 
 impl ProteinViewer {
 	pub fn show(&mut self, ui: &mut Ui) {
+		self.cache.load_threaded();
+
 		if self.protein.is_none() {
 			ui.centered_and_justified(|ui| ui.label("Brak białka do wyświetlenia"));
 			return;

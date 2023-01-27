@@ -2,6 +2,7 @@ use egui::Vec2;
 use std::cmp::Ordering;
 use usvg::*;
 
+#[derive(Clone)]
 pub struct SvgBounds {
 	top: Vec2,
 }
