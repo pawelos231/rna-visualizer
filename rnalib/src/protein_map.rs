@@ -1,5 +1,6 @@
 use std::{
 	collections::{btree_map::Keys, BTreeMap},
+	rc::Rc,
 	thread::scope,
 };
 
@@ -118,8 +119,8 @@ impl ProteinMap {
 		result
 	}
 
-	pub fn get_cloned(&self, key: &Key) -> Option<Protein> {
-		self.proteins.get(key).map(ToOwned::to_owned)
+	pub fn get(&self, key: &Key) -> Option<Rc<Protein>> {
+		self.proteins.get(key).map(|x| Rc::new(x.clone()))
 	}
 
 	pub fn keys(&self) -> Keys<Key, Protein> {

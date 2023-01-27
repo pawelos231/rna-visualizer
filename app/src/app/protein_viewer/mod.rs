@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use egui::*;
 
 mod assets;
@@ -17,7 +19,7 @@ use super::extras::Extras;
 
 #[derive(Default)]
 pub struct ProteinViewer {
-	pub protein: Option<Protein>,
+	pub protein: Option<Rc<Protein>>,
 	cache: ProteinCache,
 	painter: AcidPainter,
 }
@@ -36,36 +38,37 @@ impl ProteinViewer {
 
 	fn show_protein(&mut self, ui: &mut Ui) {
 		let Some(protein) = &self.protein else { return };
-		ScrollArea::horizontal()
-			.auto_shrink([false, false])
-			.show(ui, |ui| {
-				ui.add_space(ui.available_height() / 2.0 - 60.0 * self.painter.scale);
-				ui.horizontal(|ui| {
-					let mut codon_iter = protein.get_codons().iter();
-					let mut previous = None;
-					let mut current = codon_iter.next();
+		ScrollArea::horizontal().show(ui, |ui| {
+			ui.add_space(ui.available_height() / 2.0 - 60.0 * self.painter.scale);
+			ui.horizontal(|ui| {
+				ui.add_space(50.0);
+				let mut codon_iter = protein.get_codons().iter();
+				let mut previous = None;
+				let mut current = codon_iter.next();
 
-					self.painter.flip = false;
-					while let Some(codon) = current {
-						let next = codon_iter.next();
+				self.painter.flip = false;
+				while let Some(codon) = current {
+					let next = codon_iter.next();
 
-						let shorthand = codon.get_acid_shorthand();
-						let cache = &mut self.cache;
-						let base_type = match (previous.is_some(), next.is_some()) {
-							(false, false) => BaseType::BASE,
-							(false, true) => BaseType::BASE_NO_RIGHT,
-							(true, false) => BaseType::BASE_NO_LEFT,
-							(true, true) => BaseType::BASE_NO_SIDES,
-						};
+					let shorthand = codon.get_acid_shorthand();
+					let cache = &mut self.cache;
+					let base_type = match (previous.is_some(), next.is_some()) {
+						(false, false) => BaseType::BASE,
+						(false, true) => BaseType::BASE_NO_RIGHT,
+						(true, false) => BaseType::BASE_NO_LEFT,
+						(true, true) => BaseType::BASE_NO_SIDES,
+					};
 
-						self.painter
-							.show(ui, cache, base_type, shorthand, next.is_some());
+					self.painter
+						.show(ui, cache, base_type, shorthand, next.is_some());
 
-						previous = current;
-						current = next;
-					}
-				});
-				ui.add_space(ui.available_height());
+					previous = current;
+					current = next;
+				}
+				ui.add_space(50.0);
 			});
+			ui.add_space(ui.available_height() - 10.0);
+		});
+		ui.add_space(ui.available_height());
 	}
 }

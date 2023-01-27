@@ -1,5 +1,9 @@
+use std::rc::Rc;
+
 use egui::*;
 use rnalib::Protein;
+
+use super::extras::Extras;
 
 type ProteinCollection = super::ProteinMap;
 
@@ -11,13 +15,13 @@ pub struct ProteinSelector {
 impl ProteinSelector {
 	const PAGINATION: usize = 100;
 
-	pub fn show(&mut self, ui: &mut Ui, proteins: &ProteinCollection) -> Option<Protein> {
+	pub fn show(&mut self, ui: &mut Ui, proteins: &ProteinCollection) -> Option<Rc<Protein>> {
 		let mut result = None;
 		let min_y = ui.cursor().min.y;
 		let max_y = ui.available_height();
+		self.show_pagination_header(ui, proteins);
 		ScrollArea::vertical().show(ui, |ui| {
 			self.show_empty_message(ui, proteins);
-			self.show_pagination_header(ui, proteins);
 			result = self.show_paginated_items(ui, proteins, min_y, max_y);
 		});
 		result
@@ -32,23 +36,37 @@ impl ProteinSelector {
 	fn show_pagination_header(&mut self, ui: &mut Ui, proteins: &ProteinCollection) {
 		let pages = proteins.keys().len() / Self::PAGINATION;
 		if pages > 0 {
+			Extras::title_bar(ui, "Wybór białka");
 			ui.horizontal(|ui| {
 				let button = ui.button("<");
 				if button.clicked() && self.page > 0 {
 					self.page -= 1;
 				}
 
-				let text = format!("Strona {}/{}", self.page + 1, pages + 1);
-				ui.add_sized(
-					[ui.available_width() - button.rect.width() - 12.0, 20.],
-					Label::new(text),
-				);
+				let mut end = |ui: &mut Ui| {
+					ui.horizontal(|ui| {
+						ui.label("Strona");
+						ui.add(DragValue::new(&mut self.page));
+						ui.label(format!("z {}", pages));
+					});
+				};
+
+				let size = Extras::measure(ui, &mut end);
+				let margin = ui.available_width()
+					- size.width() - button.rect.width()
+					- ui.spacing().item_spacing.x;
+
+				ui.add_space(margin / 2.0);
+				end(ui);
+				ui.add_space(margin / 2.0);
 
 				if ui.button(">").clicked() {
 					self.page += 1;
 				}
+
 				self.page = self.page.min(pages);
 			});
+			ui.add_space(7.0);
 		} else {
 			self.page = 0;
 		}
@@ -60,7 +78,7 @@ impl ProteinSelector {
 		proteins: &ProteinCollection,
 		min_y: f32,
 		max_y: f32,
-	) -> Option<Protein> {
+	) -> Option<Rc<Protein>> {
 		let mut result = None;
 		let button_width = ui.available_width();
 		let iter = proteins.keys().skip(self.page * Self::PAGINATION);
@@ -87,7 +105,7 @@ impl ProteinSelector {
 					.add_sized([button_width, 30.], Button::new(stringed))
 					.clicked()
 				{
-					result = proteins.get_cloned(protein);
+					result = proteins.get(protein);
 				}
 			});
 

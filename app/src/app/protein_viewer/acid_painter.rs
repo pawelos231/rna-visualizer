@@ -56,7 +56,7 @@ impl AcidPainter {
 		if !self.flip {
 			ui.vertical(|ui| {
 				base_rect = base.show(ui, self.scale).rect;
-				ui.add_space(-base_size.y + 80.0 * self.scale);
+				ui.add_space(-base_size.y + 66.0 * self.scale);
 				ui.horizontal(|ui| {
 					ui.add_space(-body_top + offset);
 					body.show_no_alloc(ui, self.scale);

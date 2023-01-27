@@ -1,7 +1,7 @@
+use std::rc::Rc;
+
 use eframe::{epaint::Shadow, Frame};
-use egui::{
-	CentralPanel, Context, FontFamily, FontId, Rounding, SidePanel, TextStyle, TopBottomPanel,
-};
+use egui::*;
 use rnalib::ProteinMap;
 
 mod import_window;
@@ -16,11 +16,16 @@ use fast_text_edit::FastTextEdit;
 mod protein_viewer;
 use protein_viewer::ProteinViewer;
 
+mod colors;
 mod extras;
+
+mod property_viewer;
+use property_viewer::PropertyViewer;
 
 mod svg_image;
 
 use crate::fonts;
+
 pub type ProteinCollection = ProteinMap;
 
 #[derive(Default)]
@@ -30,6 +35,7 @@ pub struct App {
 	import_window: ImportWindow,
 	protein_selector: ProteinSelector,
 	protein_viewer: ProteinViewer,
+	property_viewer: PropertyViewer,
 }
 
 impl App {
@@ -93,11 +99,13 @@ impl eframe::App for App {
 			});
 			ui.add_space(2.0);
 		});
+
 		SidePanel::left("left_panel")
 			.min_width(300.0)
 			.show(ctx, |ui| {
 				if let Some(selection) = self.protein_selector.show(ui, &self.proteins) {
-					self.protein_viewer.protein = Some(selection);
+					self.protein_viewer.protein = Some(Rc::clone(&selection));
+					self.property_viewer.protein = Some(selection);
 				}
 			});
 
@@ -115,7 +123,7 @@ impl eframe::App for App {
 				.resizable(false)
 				.exact_height(available - height + 25.0)
 				.show(ctx, |ui| {
-					ui.centered_and_justified(|ui| ui.label("Brak danych"));
+					self.property_viewer.show(ui);
 				});
 		});
 	}
