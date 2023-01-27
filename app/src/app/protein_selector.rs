@@ -15,7 +15,7 @@ pub struct ProteinSelector {
 }
 
 impl ProteinSelector {
-	const PAGINATION: usize = 200;
+	const PAGINATION: usize = 100;
 
 	pub fn show(&mut self, ui: &mut Ui, proteins: &ProteinCollection) -> Option<Rc<Protein>> {
 		let mut result = None;
@@ -67,8 +67,11 @@ impl ProteinSelector {
 				let mut end = |ui: &mut Ui| {
 					ui.horizontal(|ui| {
 						ui.label("Strona");
-						ui.add(DragValue::new(&mut self.page));
-						ui.label(format!("z {}", pages));
+						self.page += 1;
+						ui.add(DragValue::new(&mut self.page).suffix(format!(" z {}", pages + 1)));
+						if self.page > 0 {
+							self.page -= 1;
+						}
 					});
 				};
 
