@@ -11,7 +11,7 @@ impl AminoString {
 	pub const fn from(codons: Vec<Codon>) -> Self {
 		Self { codons }
 	}
-	//Helper methods
+
 	pub fn push(&mut self, codon: Codon) {
 		self.codons.push(codon);
 	}
@@ -23,6 +23,7 @@ impl AminoString {
 	pub fn is_empty(&self) -> bool {
 		self.codons.len() == 0
 	}
+
 	pub fn get_codons(&self) -> &Vec<Codon> {
 		&self.codons
 	}
@@ -30,14 +31,16 @@ impl AminoString {
 	pub fn get_codons_mut(&mut self) -> &mut Vec<Codon> {
 		&mut self.codons
 	}
+
 	pub fn get_first(&self) -> Codon {
 		self.codons[0]
 	}
+
 	pub fn get_last(&self) -> Codon {
-		return self.codons[self.len() - 1];
+		*self.codons.last().unwrap()
 	}
 
-	//Calculate physical properties of protein
+	// physical properties
 
 	pub fn get_mass(&self) -> f32 {
 		let codon_len = self.codons.len() as f32;
@@ -53,15 +56,15 @@ impl AminoString {
 	}
 
 	pub fn get_isoletric_point(&self) {
-		let bases = Bases::init_bases(&self.get_last().get_acid().unwrap().pk2);
-		let acids = Acids::init_acids(&self.get_first().get_acid().unwrap().pk1);
+		let _bases = Bases::init_bases(&self.get_last().get_acid().unwrap().pk2);
+		let _acids = Acids::init_acids(&self.get_first().get_acid().unwrap().pk1);
 		for ph in (0..1400).map(|x| x as f64 * 0.01) {
 			println!("Index {}", ph);
 		}
 		println!("{}", &self.get_first().get_acid().unwrap());
 	}
 
-	pub fn net_charge(acids: Acids, bases: Bases, ph: f64) -> f32 {
+	pub fn net_charge(_acids: Acids, _bases: Bases, _ph: f64) -> f32 {
 		let _c = 0.0;
 
 		0.5
