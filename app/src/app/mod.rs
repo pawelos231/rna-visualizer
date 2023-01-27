@@ -93,7 +93,6 @@ impl eframe::App for App {
 			});
 			ui.add_space(2.0);
 		});
-
 		SidePanel::left("left_panel")
 			.min_width(300.0)
 			.show(ctx, |ui| {

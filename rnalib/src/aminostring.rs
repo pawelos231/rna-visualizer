@@ -55,15 +55,15 @@ impl AminoString {
 	pub fn get_isoletric_point(&self) {
 		let bases = Bases::init_bases(&self.get_last().get_acid().unwrap().pk2);
 		let acids = Acids::init_acids(&self.get_first().get_acid().unwrap().pk1);
-
-		println!("{}", "siema");
+		for ph in (0..1400).map(|x| x as f64 * 0.01) {
+			println!("Index {}", ph);
+		}
+		println!("{}", &self.get_first().get_acid().unwrap());
 	}
 
-	pub fn net_charge(&self) -> f32 {
+	pub fn net_charge(acids: Acids, bases: Bases, ph: f64) -> f32 {
 		let _c = 0.0;
-		for codon in &self.codons {
-			let _acid_data = codon.get_acid();
-		}
+
 		0.5
 	}
 
