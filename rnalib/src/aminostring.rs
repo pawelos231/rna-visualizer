@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::fmt::{Display, Write};
 
 use crate::{Acids, Bases, Codon, Nucleotide, Protein};
 
@@ -149,13 +149,9 @@ impl AminoString {
 
 impl Display for AminoString {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "[")?;
-		for (count, v) in self.codons.iter().enumerate() {
-			if count != 0 {
-				write!(f, ", ")?;
-			}
-			write!(f, "{}", v)?;
+		for codon in &self.codons {
+			f.write_char(codon.get_acid_shorthand())?;
 		}
-		write!(f, "]")
+		Ok(())
 	}
 }

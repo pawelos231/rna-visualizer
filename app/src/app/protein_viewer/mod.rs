@@ -13,10 +13,13 @@ mod protein_cache;
 pub use protein_cache::*;
 use rnalib::Protein;
 
+use super::extras::Extras;
+
 #[derive(Default)]
 pub struct ProteinViewer {
 	pub protein: Option<Protein>,
 	cache: ProteinCache,
+	painter: AcidPainter,
 }
 
 impl ProteinViewer {
@@ -26,17 +29,20 @@ impl ProteinViewer {
 			return;
 		}
 
+		Extras::title_bar(ui, "Podgląd wykresu białka");
+
 		self.show_protein(ui);
 	}
 
 	fn show_protein(&mut self, ui: &mut Ui) {
 		let Some(protein) = &self.protein else { return };
 		ScrollArea::horizontal().show(ui, |ui| {
-			ui.vertical_centered_justified(|ui| {
+			Extras::center_vert_with_margins(ui, &mut |ui| {
 				ui.horizontal(|ui| {
 					let mut codon_iter = protein.get_codons().iter();
 					let mut previous = None;
 					let mut current = codon_iter.next();
+
 					while let Some(codon) = current {
 						let next = codon_iter.next();
 
@@ -49,7 +55,7 @@ impl ProteinViewer {
 							(true, true) => BaseType::BASE_NO_SIDES,
 						};
 
-						AcidPainter::show(ui, cache, base_type, shorthand);
+						self.painter.show(ui, cache, base_type, shorthand);
 
 						previous = current;
 						current = next;
