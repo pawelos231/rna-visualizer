@@ -1,19 +1,22 @@
 use std::{
 	fs::File,
 	io::{BufRead, BufReader, Read},
+	sync::atomic::{AtomicBool, Ordering},
+	thread::spawn,
 };
 
 use egui::*;
 use rnalib::ProteinMap;
 use stringreader::StringReader;
 
+use std::sync::{Arc, Mutex};
+
 use super::ImportSettings;
 
 #[derive(Default)]
 pub struct ImportView {
 	pub settings: ImportSettings,
-	finished: bool,
-	frame: usize,
+	job: ImportJob,
 }
 
 impl ImportView {
@@ -25,23 +28,63 @@ impl ImportView {
 	}
 
 	pub fn show(&mut self, ui: &mut Ui) -> Option<ProteinMap> {
-		if self.finished {
-			ui.label("Zaimportowano dane");
-		} else {
-			ui.label("Importowanie w toku...");
+		match self.job.finished() {
+			true => ui.label("Zaimportowano dane."),
+			false => ui.label("Importowanie w toku..."),
+		};
+
+		if !self.job.started() {
+			self.job.run(self.settings.clone());
 		}
 
-		if self.frame > 0 && !self.finished {
-			self.finished = true;
-			return Some(ProteinMap::parse_multithreaded(&self.generate_output()));
+		if self.job.finished() {
+			return self.job.pop();
 		}
 
-		self.frame += 1;
 		None
 	}
+}
 
-	#[allow(clippy::needless_range_loop)]
-	pub fn generate_output(&self) -> String {
+#[derive(Default)]
+struct ImportJob {
+	result: Arc<Mutex<Option<ProteinMap>>>,
+	started: Arc<AtomicBool>,
+	finished: Arc<AtomicBool>,
+}
+
+impl ImportJob {
+	pub fn run(&mut self, settings: ImportSettings) {
+		self.started.store(true, Ordering::Relaxed);
+		self.finished.store(false, Ordering::Relaxed);
+
+		let result = self.result.clone();
+		let finished = self.finished.clone();
+
+		spawn(move || {
+			let source = Self::generate_output(&settings);
+			let map = ProteinMap::parse_multithreaded(&source);
+
+			let mut guard = result.lock().unwrap();
+			*guard = Some(map);
+
+			finished.store(true, Ordering::Relaxed);
+		});
+	}
+
+	pub fn finished(&self) -> bool {
+		self.finished.load(Ordering::Relaxed)
+	}
+
+	pub fn started(&self) -> bool {
+		self.started.load(Ordering::Relaxed)
+	}
+
+	pub fn pop(&mut self) -> Option<ProteinMap> {
+		let Ok(mut guard) = self.result.lock() else { return None };
+		guard.take()
+	}
+
+	fn generate_output(settings: &ImportSettings) -> String {
 		enum Readable<'a> {
 			Fs(File),
 			Str(StringReader<'a>),
@@ -56,26 +99,26 @@ impl ImportView {
 			}
 		}
 
-		let readable = match self.settings.from_file {
-			true => Readable::Fs(File::open(&self.settings.path).unwrap()),
-			false => Readable::Str(StringReader::new(&self.settings.input_rna)),
+		let readable = match settings.from_file {
+			true => Readable::Fs(File::open(&settings.path).unwrap()),
+			false => Readable::Str(StringReader::new(&settings.input_rna)),
 		};
 
 		let length = match &readable {
 			Readable::Fs(reader) => reader.metadata().unwrap().len() as usize,
-			Readable::Str(_) => self.settings.input_rna.len(),
+			Readable::Str(_) => settings.input_rna.len(),
 		};
 
 		let mut result_buffer = String::with_capacity(length);
 		let mut reader = BufReader::new(readable);
 
-		if self.settings.delete_header {
-			for _ in 0..self.settings.header_len {
+		if settings.delete_header {
+			for _ in 0..settings.header_len {
 				reader.read_until(b'\n', &mut Vec::new()).ok();
 			}
 		}
 
-		let separator_len = self.settings.separator.len();
+		let separator_len = settings.separator.len();
 		let rem_separator = separator_len != 0;
 
 		let mut byte_buff = [0u8; 4096];
@@ -83,14 +126,14 @@ impl ImportView {
 			if len == 0 {
 				break;
 			}
-			for i in 0..len {
-				let ch = byte_buff[i] as char;
+			for &ch in &byte_buff[0..len] {
+				let ch = ch as char;
 				if matches!(
 					ch,
 					'A' | 'G' | 'C' | 'U' | 'T' | 'a' | 'g' | 'c' | 'u' | 't'
 				) {
 					result_buffer.push(ch);
-					if rem_separator && result_buffer.ends_with(&self.settings.separator) {
+					if rem_separator && result_buffer.ends_with(&settings.separator) {
 						for _ in 0..separator_len {
 							result_buffer.pop();
 						}
