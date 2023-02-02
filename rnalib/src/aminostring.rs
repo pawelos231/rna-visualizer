@@ -59,7 +59,7 @@ impl AminoString {
 		let _bases = Bases::init_bases(&self.get_last().get_acid().unwrap().pk2);
 		let _acids = Acids::init_acids(&self.get_first().get_acid().unwrap().pk1);
 		for ph in (0..1400).map(|x| x as f64 * 0.01) {
-			println!("Index {}", ph);
+			println!("Index {ph}");
 		}
 		println!("{}", &self.get_first().get_acid().unwrap());
 	}
@@ -72,7 +72,7 @@ impl AminoString {
 
 	pub fn add_signum(hydrophobicity: f32) -> String {
 		if hydrophobicity > 0.0 {
-			format!("+{}", hydrophobicity)
+			format!("+{hydrophobicity}")
 		} else {
 			hydrophobicity.to_string()
 		}

@@ -77,8 +77,8 @@ impl App {
 
 impl eframe::App for App {
 	fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
-		if self.import_window.visible && self.import_window.show(ctx) {
-			self.rna = self.import_window.generate_output();
+		if let Some(map) = self.import_window.show(ctx) {
+			self.proteins = map;
 		}
 
 		TopBottomPanel::top("TOP").show(ctx, |ui| {
