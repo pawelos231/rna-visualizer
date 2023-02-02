@@ -2,7 +2,7 @@ use egui::*;
 use rnalib::Protein;
 
 pub trait Property {
-	fn evaluate<T: AsRef<Protein>>(&self, protein: T, normalized_t: f32) -> f32;
+	fn evaluate(protein: &Protein, x: f32) -> f32;
 
 	fn get_color() -> Color32 {
 		Color32::from_rgb(255, 65, 54)
@@ -19,14 +19,12 @@ pub trait Property {
 		);
 	}
 
-	fn show<T: AsRef<Protein>>(
-		&self,
-		protein: T,
-		ui: &mut Ui,
-		normalized_start: f32,
-		normalized_end: f32,
-	) {
+	fn show(protein: &Protein, ui: &mut Ui, normalized_start: f32, normalized_end: f32) {
 		let rect = ui.available_rect_before_wrap().shrink(10.0);
+		if rect.width() <= 0.0 || rect.height() <= 0.0 {
+			return;
+		}
+
 		Self::show_bg(ui, rect.expand(3.0));
 
 		let painter = ui.painter();
@@ -34,8 +32,8 @@ pub trait Property {
 
 		let mut values = Vec::new();
 		while sample < normalized_end {
-			values.push(self.evaluate(&protein, sample / normalized_end));
-			sample += 10.0 / rect.width();
+			values.push(Self::evaluate(protein, sample / normalized_end));
+			sample += (10.0 / rect.width()).abs().max(0.01);
 		}
 
 		let mut max_val = 0.0;
@@ -64,7 +62,19 @@ pub trait Property {
 
 pub struct Sanity;
 impl Property for Sanity {
-	fn evaluate<T: AsRef<Protein>>(&self, _: T, normalized_t: f32) -> f32 {
-		1.0 - normalized_t.powi(3)
+	fn evaluate(_: &Protein, x: f32) -> f32 {
+		1.0 - x.powi(3)
+	}
+}
+
+pub struct Hydro;
+impl Property for Hydro {
+	fn get_color() -> Color32 {
+		Color32::from_rgb(0, 116, 217)
+	}
+
+	fn evaluate(protein: &Protein, x: f32) -> f32 {
+		let n = (x * protein.len() as f32) as usize;
+		protein.get_phob(n)
 	}
 }

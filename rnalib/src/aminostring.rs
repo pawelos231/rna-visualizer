@@ -78,18 +78,21 @@ impl AminoString {
 		}
 	}
 
-	pub fn get_phob(&self) -> String {
+	pub fn get_phob(&self, n: usize) -> f32 {
 		let hydrophobicity = 7.9;
 		let final_hydrophobicity: f32 = hydrophobicity
 			+ self
 				.codons
 				.iter()
 				.map(|x| x.get_acid().map(|x| x.sc_hbob).unwrap_or(0f32))
+				.take(n)
 				.sum::<f32>();
 
-		let mut return_val = AminoString::add_signum(final_hydrophobicity);
-		return_val.push_str("Kcal * mol⁻¹");
-		return_val
+		final_hydrophobicity
+
+		// let mut return_val = AminoString::add_signum(final_hydrophobicity);
+		// return_val.push_str("Kcal * mol⁻¹");
+		// return_val
 	}
 
 	pub fn get_polarity(&self) -> f32 {
