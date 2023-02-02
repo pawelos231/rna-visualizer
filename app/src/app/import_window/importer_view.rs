@@ -29,8 +29,15 @@ impl ImportView {
 
 	pub fn show(&mut self, ui: &mut Ui) -> Option<ProteinMap> {
 		match self.job.finished() {
-			true => ui.label("Zaimportowano dane."),
-			false => ui.label("Importowanie w toku..."),
+			true => {
+				ui.label("Zaimportowano dane.");
+			}
+			false => {
+				ui.label("Importowanie w toku...");
+				if let Some(phase) = self.job.phase() {
+					ui.label(phase.as_str());
+				}
+			}
 		};
 
 		if !self.job.started() {
@@ -48,6 +55,7 @@ impl ImportView {
 #[derive(Default)]
 struct ImportJob {
 	result: Arc<Mutex<Option<ProteinMap>>>,
+	state: Arc<Mutex<String>>,
 	started: Arc<AtomicBool>,
 	finished: Arc<AtomicBool>,
 }
@@ -57,11 +65,21 @@ impl ImportJob {
 		self.started.store(true, Ordering::Relaxed);
 		self.finished.store(false, Ordering::Relaxed);
 
+		let state = self.state.clone();
 		let result = self.result.clone();
 		let finished = self.finished.clone();
 
 		spawn(move || {
+			if let Ok(mut guard) = state.lock() {
+				*guard = String::from("Filtrowanie pliku wejściowego...");
+			}
+
 			let source = Self::generate_output(&settings);
+
+			if let Ok(mut guard) = state.lock() {
+				*guard = String::from("Wczytywanie białek...");
+			}
+
 			let map = ProteinMap::parse_multithreaded(&source);
 
 			let mut guard = result.lock().unwrap();
@@ -77,6 +95,11 @@ impl ImportJob {
 
 	pub fn started(&self) -> bool {
 		self.started.load(Ordering::Relaxed)
+	}
+
+	pub fn phase(&self) -> Option<std::sync::MutexGuard<'_, String>> {
+		let Ok(guard) = self.state.lock() else { return None };
+		Some(guard)
 	}
 
 	pub fn pop(&mut self) -> Option<ProteinMap> {

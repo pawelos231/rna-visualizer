@@ -39,6 +39,13 @@ impl ImportWindow {
 	pub fn show(&mut self, ctx: &Context) -> Option<ProteinMap> {
 		let mut open = self.visible;
 		let mut result = None;
+
+		if !open {
+			if let View::Import(_) = self.view {
+				self.view = View::Settings(Default::default());
+			}
+		}
+
 		Window::new("Ustawienia importu")
 			.open(&mut open)
 			.resizable(true)
