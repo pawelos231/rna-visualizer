@@ -19,7 +19,7 @@ pub trait Property {
 		);
 	}
 
-	fn show(protein: &Protein, ui: &mut Ui, normalized_start: f32, normalized_end: f32) {
+	fn show(protein: &Protein, ui: &mut Ui, start: f32, end: f32) {
 		let rect = ui.available_rect_before_wrap().shrink(10.0);
 		if rect.width() <= 0.0 || rect.height() <= 0.0 {
 			return;
@@ -27,21 +27,24 @@ pub trait Property {
 
 		Self::show_bg(ui, rect.expand(3.0));
 
-		let painter = ui.painter();
-		let mut sample = normalized_start;
-
 		let mut values = Vec::new();
-		while sample < normalized_end {
-			values.push(Self::evaluate(protein, sample / normalized_end));
+		let mut sample = start;
+		let mut min = f32::MAX;
+		let mut max = f32::MIN;
+		while sample < end {
+			let value = Self::evaluate(protein, sample / end);
+			values.push(value);
+			max = max.max(value);
+			min = min.min(value);
 			sample += (10.0 / rect.width()).abs().max(0.01);
 		}
+		let scale = 1.0 / (min - max).abs();
 
-		let mut max_val = 0.0;
-		for value in &values {
-			if *value > max_val {
-				max_val = *value;
-			}
-		}
+		let painter = ui.painter();
+		painter.line_segment(
+			[rect.left_center(), rect.right_center()],
+			Stroke::new(1.0, ui.style().visuals.faint_bg_color),
+		);
 
 		let mut previous = None;
 		let stroke = Stroke::new(1.0, Self::get_color());
@@ -49,14 +52,23 @@ pub trait Property {
 		let length = values.len();
 		for value in values.iter().enumerate() {
 			let eval_x = value.0 as f32 / length as f32;
-			let eval_y = *value.1 / max_val;
+			let eval_y = 1.0 - (*value.1 * scale).clamp(0.0, 1.0);
 			let eval_p = Pos2::new(
-				(1.0 - eval_x) * rect.min.x + eval_x * rect.max.x,
-				eval_y * rect.min.y + (1.0 - eval_y) * rect.max.y,
+				(1.0 - eval_x) * rect.left() + eval_x * rect.right(),
+				rect.top() + eval_y * rect.height(),
 			);
 			painter.line_segment([previous.unwrap_or(eval_p), eval_p], stroke);
 			previous = Some(eval_p);
 		}
+
+		let m_val = max.abs().max(min.abs());
+		ui.allocate_ui_at_rect(Rect::from_points(&[rect.left_top()]), |ui| {
+			ui.label(RichText::new(format!("{m_val:.2}")).weak())
+		});
+		ui.allocate_ui_at_rect(
+			Rect::from_points(&[rect.left_bottom() - Vec2::Y * 18.0]),
+			|ui| ui.label(RichText::new(format!("-{m_val:.2}")).weak()),
+		);
 	}
 }
 
