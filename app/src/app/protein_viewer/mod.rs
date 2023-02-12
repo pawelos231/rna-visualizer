@@ -2,6 +2,9 @@ use std::rc::Rc;
 
 use egui::*;
 
+mod protein_svg;
+pub use protein_svg::*;
+
 mod assets;
 pub use assets::*;
 

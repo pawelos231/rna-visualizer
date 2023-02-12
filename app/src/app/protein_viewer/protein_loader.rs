@@ -2,16 +2,28 @@ use std::cell::RefMut;
 
 use crate::app::svg_image::SvgImage;
 
-use super::assets::*;
+use super::{assets::*, ProteinSvg};
 use usvg::*;
 
 pub struct ProteinLoader;
 
 impl ProteinLoader {
-	pub fn load(shorthand: char) -> Option<SvgImage> {
-		let svg = get_acid_svg(shorthand)?;
-		let tree = Self::process_svg(svg);
-		Some(SvgImage::from_svg_tree(&tree))
+	pub fn load(shorthand: char) -> Option<ProteinSvg> {
+		let body = get_body(shorthand)?;
+
+		let regular_src = body.get_regular();
+		let regular_tree = Self::process_svg(regular_src);
+		let regular = SvgImage::from_svg_tree(&regular_tree);
+
+		let flipped = match body.get_flipped() {
+			Some(flipped_src) => {
+				let flipped_tree = Self::process_svg(flipped_src);
+				Some(SvgImage::from_svg_tree(&flipped_tree))
+			}
+			None => None,
+		};
+
+		Some(ProteinSvg::new(regular, flipped))
 	}
 
 	pub fn load_base(base_type: BaseType) -> Option<SvgImage> {

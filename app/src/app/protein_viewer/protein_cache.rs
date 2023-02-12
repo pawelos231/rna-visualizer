@@ -12,7 +12,7 @@ use crate::app::svg_image::SvgImage;
 
 #[derive(Default)]
 pub struct ProteinCache {
-	svgs: HashMap<char, SvgImage>,
+	svgs: HashMap<char, ProteinSvg>,
 	base_svgs: HashMap<usize, SvgImage>,
 	loader: ThreadedLoader,
 }
@@ -62,7 +62,7 @@ impl ProteinCache {
 		self.loader.busy = false;
 	}
 
-	pub fn get(&self, shorthand: char) -> Option<&SvgImage> {
+	pub fn get(&self, shorthand: char) -> Option<&ProteinSvg> {
 		self.svgs.get(&shorthand)
 	}
 
@@ -73,7 +73,7 @@ impl ProteinCache {
 
 #[derive(Default)]
 struct ThreadedLoader {
-	svgs: Arc<Mutex<HashMap<char, SvgImage>>>,
+	svgs: Arc<Mutex<HashMap<char, ProteinSvg>>>,
 	base_svgs: Arc<Mutex<HashMap<usize, SvgImage>>>,
 	loaded: Arc<AtomicBool>,
 	busy: bool,

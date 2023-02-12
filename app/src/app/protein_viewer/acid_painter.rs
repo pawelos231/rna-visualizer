@@ -32,8 +32,6 @@ impl AcidPainter {
 		let Some(body) = cache.get(shorthand) else { return };
 
 		let base_size = base.get_size_vec2() * self.scale;
-		let body_size = body.get_size_vec2() * self.scale;
-		let body_top = body.get_bounds().get_top()[0] * self.scale;
 
 		if !ui
 			.clip_rect()
@@ -45,6 +43,13 @@ impl AcidPainter {
 			ui.add_space(60.0 * self.scale);
 			return;
 		}
+
+		let body = match self.flip {
+			true => body.get_flipped(),
+			false => body.get(),
+		};
+		let body_size = body.get_size_vec2() * self.scale;
+		let body_top = body.get_bounds().get_top()[0] * self.scale;
 
 		let offset = match base_type {
 			BaseType::BASE | BaseType::BASE_NO_RIGHT => 100.0,

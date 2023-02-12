@@ -1,9 +1,14 @@
-use concat_idents::concat_idents;
-use const_str::to_char_array;
+macro_rules! include_strs {
+	( $( $name:ident ),* ) => {
+		$(
+			const $name: &str = include_str!(concat!("./svg/", stringify!($name), ".svg"));
+		)*
+	};
+}
 
 macro_rules! include_bases {
 	( $( $name:ident ),* ) => {
-		include_many!($($name),*);
+		include_strs!($($name),*);
 
 		#[derive(Clone, Copy)]
 		#[allow(non_camel_case_types)]
@@ -20,30 +25,60 @@ macro_rules! include_bases {
 	};
 }
 
-macro_rules! include_bodies {
-	( $( $name:ident ),* ) => {
-		include_many!($($name),*);
-		$(
-			concat_idents!(id = $name, _CHAR {
-				const id: char = to_char_array!(stringify!($name))[0];
-			});
-		)*
-
-		pub fn get_acid_svg(shorthand: char) -> Option<&'static str> {
-			match shorthand.to_ascii_uppercase() {
-				$(concat_idents!(id = $name , _CHAR { id } ) => Some($name),)*
-				_ => None,
-			}
-		}
-	};
+pub struct Body {
+	regular: &'static str,
+	flipped: Option<&'static str>,
 }
 
-macro_rules! include_many {
-	( $( $name:ident ),* ) => {
-		$(
-			pub const $name: &str = include_str!(concat!("./svg/", stringify!($name), ".svg"));
-		)*
-	};
+impl Body {
+	const fn new(regular: &'static str) -> Self {
+		Self {
+			regular,
+			flipped: None,
+		}
+	}
+
+	const fn new_flipped(regular: &'static str, flipped: &'static str) -> Self {
+		Self {
+			regular,
+			flipped: Some(flipped),
+		}
+	}
+
+	pub const fn get_regular(&self) -> &'static str {
+		self.regular
+	}
+
+	pub const fn get_flipped(&self) -> Option<&'static str> {
+		self.flipped
+	}
+}
+
+pub const fn get_body(index: char) -> Option<Body> {
+	Some(match index {
+		'A' => Body::new(A),
+		'C' => Body::new_flipped(C, C_FLIP),
+		'D' => Body::new(D),
+		'E' => Body::new(E),
+		'F' => Body::new(F),
+		'G' => Body::new(G),
+		'H' => Body::new_flipped(H, H_FLIP),
+		'I' => Body::new(I),
+		'K' => Body::new_flipped(K, K_FLIP),
+		'L' => Body::new(L),
+		'M' => Body::new_flipped(M, M_FLIP),
+		'N' => Body::new_flipped(N, N_FLIP),
+		'P' => Body::new(P),
+		'Q' => Body::new_flipped(Q, Q_FLIP),
+		'R' => Body::new_flipped(R, R_FLIP),
+		'S' => Body::new(S),
+		'T' => Body::new(T),
+		'U' => Body::new_flipped(U, U_FLIP),
+		'V' => Body::new(V),
+		'W' => Body::new_flipped(W, W_FLIP),
+		'Y' => Body::new(Y),
+		_ => return None,
+	})
 }
 
 #[rustfmt::skip]
@@ -56,11 +91,9 @@ include_bases!(
 );
 
 #[rustfmt::skip]
-include_bodies!(
-	A, C, D, E,
-	F, H, I, K, 
-	L, M, N, P,
-	Q, R, S, T,
-	U, V, W, Y,
-	G
+include_strs!(
+	A, C, C_FLIP, D, E, F, H, H_FLIP, I, 
+	K, K_FLIP, L, M, M_FLIP, N, N_FLIP, P,
+	Q, Q_FLIP, R, R_FLIP, S, T, U, U_FLIP,
+	V, W, W_FLIP, Y, G
 );
