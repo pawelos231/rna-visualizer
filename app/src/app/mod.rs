@@ -106,7 +106,7 @@ impl eframe::App for App {
 			.show(ctx, |ui| {
 				if let Some(selection) = self.protein_selector.show(ui, &self.proteins) {
 					self.protein_viewer.protein = Some(Rc::clone(&selection));
-					self.property_viewer.protein = Some(selection);
+					self.property_viewer.set(selection);
 				}
 			});
 

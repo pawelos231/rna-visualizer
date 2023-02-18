@@ -7,7 +7,8 @@ pub trait Property {
 	fn get_color() -> Color32 {
 		Color32::from_rgb(255, 65, 54)
 	}
-
+	fn get_unit() -> String;
+	fn get_name() -> String;
 	fn show_bg(ui: &mut Ui, rect: Rect) {
 		let painter = ui.painter();
 
@@ -74,12 +75,24 @@ pub trait Property {
 
 pub struct Mass;
 impl Property for Mass {
+	fn get_unit() -> String {
+		String::from("Dalton")
+	}
+	fn get_name() -> String {
+		String::from("Masa")
+	}
 	fn evaluate(protein: &Protein, x: f32) -> f32 {
 		protein.get_mass()
 	}
 }
 pub struct Pi;
 impl Property for Pi {
+	fn get_unit() -> String {
+		String::from("is")
+	}
+	fn get_name() -> String {
+		String::from("Punkt izoelektryczny")
+	}
 	fn get_color() -> Color32 {
 		Color32::from_rgb(221, 221, 221)
 	}
@@ -89,6 +102,12 @@ impl Property for Pi {
 }
 pub struct NetCharge;
 impl Property for NetCharge {
+	fn get_unit() -> String {
+		String::from("zakłada ph = 7")
+	}
+	fn get_name() -> String {
+		String::from("Suma ładunków")
+	}
 	fn get_color() -> Color32 {
 		Color32::from_rgb(52, 186, 186)
 	}
@@ -98,6 +117,12 @@ impl Property for NetCharge {
 }
 pub struct Extinction;
 impl Property for Extinction {
+	fn get_unit() -> String {
+		String::from("M⁻¹ * cm⁻¹")
+	}
+	fn get_name() -> String {
+		String::from("Współczynnik absorbcji")
+	}
 	fn get_color() -> Color32 {
 		Color32::from_rgb(255, 220, 0)
 	}
@@ -108,6 +133,12 @@ impl Property for Extinction {
 
 pub struct Hydro;
 impl Property for Hydro {
+	fn get_unit() -> String {
+		String::from("Kcal * mol⁻¹")
+	}
+	fn get_name() -> String {
+		String::from("Indeks hydrofobowy")
+	}
 	fn get_color() -> Color32 {
 		Color32::from_rgb(0, 116, 217)
 	}

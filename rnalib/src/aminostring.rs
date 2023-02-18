@@ -13,10 +13,15 @@ pub struct AminoString {
 
 impl AminoString {
 	pub fn from(codons: Vec<Codon>) -> Self {
-		Self {
-			codons,
-			counts: HashMap::new(),
+		let mut counts = HashMap::new();
+		for codon in &codons {
+			let short = codon.get_acid_shorthand();
+			match counts.get(&short) {
+				Some(k) => counts.insert(short, k + 1),
+				None => counts.insert(short, 1),
+			};
 		}
+		Self { codons, counts }
 	}
 
 	pub fn push(&mut self, codon: Codon) {
@@ -27,7 +32,16 @@ impl AminoString {
 		};
 		self.codons.push(codon);
 	}
-
+	pub fn slice(&self, start: usize, length: usize) -> AminoString {
+		AminoString::from(
+			self.codons
+				.iter()
+				.map(|x| *x)
+				.skip(start)
+				.take(length)
+				.collect(),
+		)
+	}
 	pub fn get_codon_count(&self, key: char) -> u32 {
 		*self.counts.get(&key).unwrap_or(&0)
 	}

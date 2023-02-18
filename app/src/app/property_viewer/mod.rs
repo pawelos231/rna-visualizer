@@ -21,10 +21,13 @@ const PROPERTIES: [(&str, &str, Option<ShowPtr>); 5] = [
 
 #[derive(Default)]
 pub struct PropertyViewer {
-	pub protein: Option<Rc<Protein>>,
+	protein: Option<Rc<Protein>>,
 }
 
 impl PropertyViewer {
+	pub fn set(&mut self, protein: Rc<Protein>) {
+		self.protein = Some(protein);
+	}
 	pub fn show(&mut self, ui: &mut Ui) {
 		let Some(protein) = &self.protein else {
 			ui.centered_and_justified(|ui| ui.label("Brak danych"));
