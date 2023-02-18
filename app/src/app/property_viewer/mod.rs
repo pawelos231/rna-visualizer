@@ -81,7 +81,7 @@ impl PropertyViewer {
 		Extras::title_bar(ui, "Właściwości białka");
 
 		Grid::new("PROTEIN_PROPERTY_GRID")
-			.min_row_height(ui.available_height() / 5.0 as f32 - 5.0)
+			.min_row_height(ui.available_height() / 5.0_f32 - 5.0)
 			.num_columns(2)
 			.striped(true)
 			.show(ui, |ui| {

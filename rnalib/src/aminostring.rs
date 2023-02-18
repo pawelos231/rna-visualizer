@@ -36,7 +36,7 @@ impl AminoString {
 		Self::from(
 			self.codons
 				.iter()
-				.map(|x| *x)
+				.copied()
 				.skip(start)
 				.take(length)
 				.collect(),
@@ -143,13 +143,13 @@ impl AminoString {
 		result
 	}
 
-	pub fn get_phob(&self, n: usize) -> f32 {
+	pub fn get_phob(&self, _n: usize) -> f32 {
 		let mut hydrophobicity = 7.9;
 		for codon in &self.codons {
-			let acid_data = Codon::get_acid(&codon).unwrap();
+			let acid_data = Codon::get_acid(codon).unwrap();
 			hydrophobicity += acid_data.sc_hbob;
 		}
-		return hydrophobicity;
+		hydrophobicity
 	}
 
 	pub fn get_polarity(&self) -> f32 {

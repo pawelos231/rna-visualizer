@@ -16,10 +16,10 @@ pub trait Property {
 	fn generate_cache(protein: &Protein) -> [f32; 100] {
 		let mut cache = [0.0; 100];
 		let unit = protein.len() as f32 / 100.0;
-		for i in 0..100 {
+		(0..100).for_each(|i| {
 			let x = unit * i as f32;
 			cache[i] = Self::evaluate(&protein.slice(0, 1 + x as usize), 1.0);
-		}
+		});
 		cache
 	}
 
@@ -147,7 +147,7 @@ impl Property for Mass {
 		String::from("Dalton")
 	}
 
-	fn evaluate(protein: &AminoString, x: f32) -> f32 {
+	fn evaluate(protein: &AminoString, _x: f32) -> f32 {
 		protein.get_mass()
 	}
 }
@@ -165,7 +165,7 @@ impl Property for Pi {
 		Color32::from_rgb(221, 221, 221)
 	}
 
-	fn evaluate(protein: &AminoString, x: f32) -> f32 {
+	fn evaluate(protein: &AminoString, _x: f32) -> f32 {
 		protein.get_isoletric_point()
 	}
 }
@@ -183,7 +183,7 @@ impl Property for NetCharge {
 		Color32::from_rgb(52, 186, 186)
 	}
 
-	fn evaluate(protein: &AminoString, x: f32) -> f32 {
+	fn evaluate(protein: &AminoString, _x: f32) -> f32 {
 		protein.get_neutral_charge()
 	}
 }
@@ -201,7 +201,7 @@ impl Property for Extinction {
 		Color32::from_rgb(255, 220, 0)
 	}
 
-	fn evaluate(protein: &AminoString, x: f32) -> f32 {
+	fn evaluate(protein: &AminoString, _x: f32) -> f32 {
 		protein.get_ext() as f32
 	}
 }
