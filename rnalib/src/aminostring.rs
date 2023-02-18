@@ -59,6 +59,15 @@ impl AminoString {
 
 	// physical properties
 
+	pub fn get_ext(&self) -> u32 {
+		let cysteines = self.get_codon_count('C');
+		let cystines = (cysteines - (cysteines % 2)) / 2;
+
+		self.get_codon_count('W') * Acid::W.extco.unwrap()
+			+ self.get_codon_count('Y') * Acid::Y.extco.unwrap()
+			+ cystines * Acid::C.extco.unwrap()
+	}
+
 	pub fn get_mass(&self) -> f32 {
 		let codon_len = self.codons.len() as f32;
 		let sum = crate::ALPHA_MASS * codon_len + crate::H2_MASS;
@@ -75,8 +84,6 @@ impl AminoString {
 		self.net_charge(7.0)
 	}
 	pub fn get_isoletric_point(&self) -> f32 {
-		let _bases = Bases::init_bases(&self.get_last().get_acid().unwrap().pk2);
-		let _acids = Acids::init_acids(&self.get_first().get_acid().unwrap().pk1);
 		let mut pi = 0.0;
 		for ph in (0..1400).map(|x| x as f32 * 0.01) {
 			pi = ph;

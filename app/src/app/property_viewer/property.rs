@@ -84,6 +84,18 @@ impl Property for Pi {
 		protein.get_isoletric_point()
 	}
 }
+pub struct NetCharge;
+impl Property for NetCharge {
+	fn evaluate(protein: &Protein, x: f32) -> f32 {
+		protein.get_neutral_charge()
+	}
+}
+pub struct Extinction;
+impl Property for Extinction {
+	fn evaluate(protein: &Protein, x: f32) -> f32 {
+		protein.get_ext() as f32
+	}
+}
 
 pub struct Sanity;
 impl Property for Sanity {

@@ -13,8 +13,8 @@ type ShowPtr = fn(p: &Protein, ui: &mut Ui, s: f32, e: f32);
 #[rustfmt::skip]
 const PROPERTIES: [(&str, &str, Option<ShowPtr>); 5] = [
 	("Indeks hydrofobowy",		"Kcal * mol⁻¹",		Some(Hydro::show)),
-	("Indeks pH",				"_",				None),
-	("Polarność",				"_",				None),
+	("Extinction",				"M-1 * cm-1",		Some(Extinction::show)),
+	("NetCharge",				"netch",			Some(NetCharge::show)),
 	("Punkt izoelektryczny",	"is",				Some(Pi::show)),
 	("Mass", 					"Dalton",			Some(Mass::show)),
 ];
