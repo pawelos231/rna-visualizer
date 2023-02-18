@@ -32,8 +32,8 @@ impl AminoString {
 		};
 		self.codons.push(codon);
 	}
-	pub fn slice(&self, start: usize, length: usize) -> AminoString {
-		AminoString::from(
+	pub fn slice(&self, start: usize, length: usize) -> Self {
+		Self::from(
 			self.codons
 				.iter()
 				.map(|x| *x)
