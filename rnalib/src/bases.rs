@@ -4,6 +4,7 @@ pub struct Terminals {
 	pub count: u32,
 	pub pk: f32,
 }
+
 impl Terminals {
 	pub fn init_terminal(first_amino: &f32) -> Self {
 		Self {

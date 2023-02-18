@@ -1,19 +1,35 @@
-use std::fmt::{Display, Write};
+use std::{
+	collections::HashMap,
+	fmt::{Display, Write},
+};
 
-use crate::{Acids, Bases, Codon, Nucleotide, Protein};
+use crate::{Acid, Acids, Bases, Codon, Nucleotide, Protein};
 
 #[derive(Default, Clone)]
 pub struct AminoString {
 	codons: Vec<Codon>,
+	counts: HashMap<char, u32>,
 }
 
 impl AminoString {
-	pub const fn from(codons: Vec<Codon>) -> Self {
-		Self { codons }
+	pub fn from(codons: Vec<Codon>) -> Self {
+		Self {
+			codons,
+			counts: HashMap::new(),
+		}
 	}
 
 	pub fn push(&mut self, codon: Codon) {
+		let short = codon.get_acid_shorthand();
+		match self.counts.get(&short) {
+			Some(k) => self.counts.insert(short, k + 1),
+			None => self.counts.insert(short, 1),
+		};
 		self.codons.push(codon);
+	}
+
+	pub fn get_codon_count(&self, key: char) -> u32 {
+		*self.counts.get(&key).unwrap_or(&0)
 	}
 
 	pub fn len(&self) -> usize {
@@ -28,8 +44,9 @@ impl AminoString {
 		&self.codons
 	}
 
-	pub fn get_codons_mut(&mut self) -> &mut Vec<Codon> {
-		&mut self.codons
+	pub fn clear(&mut self) {
+		self.codons.clear();
+		self.counts.clear();
 	}
 
 	pub fn get_first(&self) -> Codon {
@@ -54,20 +71,55 @@ impl AminoString {
 				.sum::<f32>();
 		final_mass
 	}
-
-	pub fn get_isoletric_point(&self) {
+	pub fn get_neutral_charge(&self) -> f32 {
+		self.net_charge(7.0)
+	}
+	pub fn get_isoletric_point(&self) -> f32 {
 		let _bases = Bases::init_bases(&self.get_last().get_acid().unwrap().pk2);
 		let _acids = Acids::init_acids(&self.get_first().get_acid().unwrap().pk1);
-		for ph in (0..1400).map(|x| x as f64 * 0.01) {
-			println!("Index {ph}");
+		let mut pi = 0.0;
+		for ph in (0..1400).map(|x| x as f32 * 0.01) {
+			pi = ph;
+			if self.net_charge(ph) <= 0.0 {
+				break;
+			}
 		}
-		println!("{}", &self.get_first().get_acid().unwrap());
+		pi
 	}
 
-	pub fn net_charge(_acids: Acids, _bases: Bases, _ph: f64) -> f32 {
-		let _c = 0.0;
+	pub fn net_charge(&self, ph: f32) -> f32 {
+		let mut result = 0.0;
 
-		0.5
+		let counts_acids = [
+			(1, self.get_first().get_acid().unwrap().pk1),
+			(self.get_codon_count('D'), Acid::D.pk3.unwrap()),
+			(self.get_codon_count('E'), Acid::E.pk3.unwrap()),
+			(self.get_codon_count('C'), Acid::C.pk3.unwrap()),
+			(self.get_codon_count('Y'), Acid::Y.pk3.unwrap()),
+		];
+
+		let counts_bases = [
+			(1, self.get_last().get_acid().unwrap().pk2),
+			(self.get_codon_count('K'), Acid::K.pk3.unwrap()),
+			(self.get_codon_count('R'), Acid::R.pk3.unwrap()),
+			(self.get_codon_count('H'), Acid::H.pk3.unwrap()),
+		];
+
+		for (count, pk) in counts_acids {
+			let count = count as f32;
+			if count > 0.0 {
+				result += -count / (1.0 + f32::powf(10.0, pk - ph));
+			}
+		}
+
+		for (count, pk) in counts_bases {
+			let count = count as f32;
+			if count > 0.0 {
+				result += count / (1.0 + f32::powf(10.0, ph - pk));
+			}
+		}
+
+		result
 	}
 
 	pub fn add_signum(hydrophobicity: f32) -> String {

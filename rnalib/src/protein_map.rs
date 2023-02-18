@@ -102,7 +102,7 @@ impl ProteinMap {
 			if protein && acid == STOP {
 				if !current.is_empty() {
 					result.insert(Key(current.to_string()), current.clone());
-					current.get_codons_mut().clear();
+					current.clear();
 				}
 				protein = false;
 			}
