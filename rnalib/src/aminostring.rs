@@ -122,29 +122,13 @@ impl AminoString {
 		result
 	}
 
-	pub fn add_signum(hydrophobicity: f32) -> String {
-		if hydrophobicity > 0.0 {
-			format!("+{hydrophobicity}")
-		} else {
-			hydrophobicity.to_string()
-		}
-	}
-
 	pub fn get_phob(&self, n: usize) -> f32 {
-		let hydrophobicity = 7.9;
-		let final_hydrophobicity: f32 = hydrophobicity
-			+ self
-				.codons
-				.iter()
-				.map(|x| x.get_acid().map(|x| x.sc_hbob).unwrap_or(0f32))
-				.take(n)
-				.sum::<f32>();
-
-		final_hydrophobicity
-
-		// let mut return_val = AminoString::add_signum(final_hydrophobicity);
-		// return_val.push_str("Kcal * mol⁻¹");
-		// return_val
+		let mut hydrophobicity = 7.9;
+		for codon in &self.codons {
+			let acid_data = Codon::get_acid(&codon).unwrap();
+			hydrophobicity += acid_data.sc_hbob;
+		}
+		return hydrophobicity;
 	}
 
 	pub fn get_polarity(&self) -> f32 {

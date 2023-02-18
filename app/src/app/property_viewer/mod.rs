@@ -15,8 +15,8 @@ const PROPERTIES: [(&str, &str, Option<ShowPtr>); 5] = [
 	("Indeks hydrofobowy",		"Kcal * mol⁻¹",		Some(Hydro::show)),
 	("Indeks pH",				"_",				None),
 	("Polarność",				"_",				None),
-	("Punkt izoelektryczny",	"_",				None),
-	("Poczytalność", 			"°C",				Some(Sanity::show)),
+	("Punkt izoelektryczny",	"is",				Some(Pi::show)),
+	("Mass", 					"Dalton",			Some(Mass::show)),
 ];
 
 #[derive(Default)]

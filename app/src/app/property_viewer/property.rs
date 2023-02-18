@@ -72,6 +72,19 @@ pub trait Property {
 	}
 }
 
+pub struct Mass;
+impl Property for Mass {
+	fn evaluate(protein: &Protein, x: f32) -> f32 {
+		protein.get_mass()
+	}
+}
+pub struct Pi;
+impl Property for Pi {
+	fn evaluate(protein: &Protein, x: f32) -> f32 {
+		protein.get_isoletric_point()
+	}
+}
+
 pub struct Sanity;
 impl Property for Sanity {
 	fn evaluate(_: &Protein, x: f32) -> f32 {
