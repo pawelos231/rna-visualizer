@@ -80,27 +80,29 @@ impl Property for Mass {
 }
 pub struct Pi;
 impl Property for Pi {
+	fn get_color() -> Color32 {
+		Color32::from_rgb(221, 221, 221)
+	}
 	fn evaluate(protein: &Protein, x: f32) -> f32 {
 		protein.get_isoletric_point()
 	}
 }
 pub struct NetCharge;
 impl Property for NetCharge {
+	fn get_color() -> Color32 {
+		Color32::from_rgb(52, 186, 186)
+	}
 	fn evaluate(protein: &Protein, x: f32) -> f32 {
 		protein.get_neutral_charge()
 	}
 }
 pub struct Extinction;
 impl Property for Extinction {
+	fn get_color() -> Color32 {
+		Color32::from_rgb(255, 220, 0)
+	}
 	fn evaluate(protein: &Protein, x: f32) -> f32 {
 		protein.get_ext() as f32
-	}
-}
-
-pub struct Sanity;
-impl Property for Sanity {
-	fn evaluate(_: &Protein, x: f32) -> f32 {
-		1.0 - x.powi(3)
 	}
 }
 

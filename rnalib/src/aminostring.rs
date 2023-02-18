@@ -3,7 +3,7 @@ use std::{
 	fmt::{Display, Write},
 };
 
-use crate::{Acid, Acids, Bases, Codon, Nucleotide, Protein};
+use crate::{Acid, Codon, Nucleotide, Protein};
 
 #[derive(Default, Clone)]
 pub struct AminoString {
