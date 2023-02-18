@@ -6,6 +6,8 @@ use rnalib::Protein;
 mod property;
 use property::*;
 
+mod math;
+
 use super::extras::Extras;
 
 #[derive(Default)]

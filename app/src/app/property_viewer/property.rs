@@ -2,12 +2,20 @@ use egui::*;
 use rnalib::AminoString;
 use rnalib::Protein;
 
+use super::math::inv_lerp;
+use super::math::lerp;
+use super::math::qerp;
+
 pub trait Property {
 	fn evaluate(protein: &AminoString, x: f32) -> f32;
 
 	fn get_name(&self) -> String;
 
 	fn get_unit(&self) -> String;
+
+	fn get_show_negative(&self) -> bool {
+		true
+	}
 
 	fn get_color() -> Color32 {
 		Color32::from_rgb(255, 65, 54)
@@ -35,12 +43,12 @@ pub trait Property {
 	}
 
 	fn show_samples(&self, ui: &mut Ui, samples: [f32; 100]) {
-		//TODO: add interpolation, start y values from 0
-
 		let rect = ui.available_rect_before_wrap().shrink(10.0);
 		if rect.width() <= 0.0 || rect.height() <= 0.0 {
 			return;
 		}
+
+		ui.vertical_centered_justified(|ui| ui.label(""));
 
 		Self::show_bg(ui, rect.expand(3.0));
 
@@ -51,7 +59,11 @@ pub trait Property {
 			min = min.min(value);
 		}
 
-		let scale = 1.0 / (min - max).abs();
+		let max_val = max.abs().max(min.abs());
+		let min_val = match self.get_show_negative() {
+			true => -max_val,
+			false => 0.0,
+		};
 
 		let painter = ui.painter();
 		painter.line_segment(
@@ -62,78 +74,43 @@ pub trait Property {
 		let mut previous = None;
 		let stroke = Stroke::new(1.0, Self::get_color());
 
-		let length = samples.len();
-		for value in samples.iter().enumerate() {
-			let eval_x = value.0 as f32 / length as f32;
-			let eval_y = 1.0 - (*value.1 * scale).clamp(0.0, 1.0);
-			let eval_p = Pos2::new(
-				(1.0 - eval_x) * rect.left() + eval_x * rect.right(),
-				rect.top() + eval_y * rect.height(),
+		let end = rect.width() as u32;
+		for i in 0..end {
+			let x = i as f32 / end as f32;
+
+			let index_x = x * samples.len() as f32;
+			let local_t = index_x - index_x.floor();
+			let prev = samples[index_x as usize];
+			let next = samples[(index_x as usize + 1).min(samples.len() - 1)];
+
+			let value = qerp(prev, next, local_t);
+			let t = inv_lerp(min_val, max_val, value);
+			let p = Pos2::new(
+				lerp(rect.left(), rect.right(), x),
+				lerp(rect.bottom(), rect.top(), t),
 			);
-			painter.line_segment([previous.unwrap_or(eval_p), eval_p], stroke);
-			previous = Some(eval_p);
+
+			painter.line_segment([previous.unwrap_or(p), p], stroke);
+			previous = Some(p);
 		}
 
-		let m_val = max.abs().max(min.abs());
 		ui.allocate_ui_at_rect(Rect::from_points(&[rect.left_top()]), |ui| {
-			ui.label(RichText::new(format!("{m_val:.2}")).weak())
+			ui.label(RichText::new(format!("{max_val:.2}")).weak())
 		});
+
 		ui.allocate_ui_at_rect(
 			Rect::from_points(&[rect.left_bottom() - Vec2::Y * 18.0]),
-			|ui| ui.label(RichText::new(format!("-{m_val:.2}")).weak()),
+			|ui| ui.label(RichText::new(format!("{min_val:.2}")).weak()),
 		);
 	}
 
-	fn show(&self, protein: &Protein, ui: &mut Ui, start: f32, end: f32) {
-		let rect = ui.available_rect_before_wrap().shrink(10.0);
-		if rect.width() <= 0.0 || rect.height() <= 0.0 {
-			return;
-		}
-
-		Self::show_bg(ui, rect.expand(3.0));
-
-		let mut values = Vec::new();
-		let mut sample = start;
-		let mut min = f32::MAX;
-		let mut max = f32::MIN;
-		while sample < end {
-			let value = Self::evaluate(protein, sample / end);
-			values.push(value);
-			max = max.max(value);
-			min = min.min(value);
-			sample += (10.0 / rect.width()).abs().max(0.01);
-		}
-		let scale = 1.0 / (min - max).abs();
-
-		let painter = ui.painter();
-		painter.line_segment(
-			[rect.left_center(), rect.right_center()],
-			Stroke::new(1.0, ui.style().visuals.faint_bg_color),
-		);
-
-		let mut previous = None;
-		let stroke = Stroke::new(1.0, Self::get_color());
-
-		let length = values.len();
-		for value in values.iter().enumerate() {
-			let eval_x = value.0 as f32 / length as f32;
-			let eval_y = 1.0 - (*value.1 * scale).clamp(0.0, 1.0);
-			let eval_p = Pos2::new(
-				(1.0 - eval_x) * rect.left() + eval_x * rect.right(),
-				rect.top() + eval_y * rect.height(),
-			);
-			painter.line_segment([previous.unwrap_or(eval_p), eval_p], stroke);
-			previous = Some(eval_p);
-		}
-
-		let m_val = max.abs().max(min.abs());
-		ui.allocate_ui_at_rect(Rect::from_points(&[rect.left_top()]), |ui| {
-			ui.label(RichText::new(format!("{m_val:.2}")).weak())
+	fn show(&self, protein: &Protein, ui: &mut Ui) {
+		let mut samples = [0.0; 100];
+		(0..100).for_each(|i| {
+			let value = Self::evaluate(protein, i as f32 / 100.0);
+			samples[i] = value;
 		});
-		ui.allocate_ui_at_rect(
-			Rect::from_points(&[rect.left_bottom() - Vec2::Y * 18.0]),
-			|ui| ui.label(RichText::new(format!("-{m_val:.2}")).weak()),
-		);
+		self.show_samples(ui, samples);
 	}
 }
 
@@ -147,6 +124,10 @@ impl Property for Mass {
 		String::from("Dalton")
 	}
 
+	fn get_show_negative(&self) -> bool {
+		false
+	}
+
 	fn evaluate(protein: &AminoString, _x: f32) -> f32 {
 		protein.get_mass()
 	}
@@ -155,6 +136,10 @@ pub struct Pi;
 impl Property for Pi {
 	fn get_name(&self) -> String {
 		String::from("Punkt izoelektryczny")
+	}
+
+	fn get_show_negative(&self) -> bool {
+		false
 	}
 
 	fn get_unit(&self) -> String {
@@ -176,7 +161,7 @@ impl Property for NetCharge {
 	}
 
 	fn get_unit(&self) -> String {
-		String::from("zakłada ph = 7")
+		String::from("zakłada ph 7")
 	}
 
 	fn get_color() -> Color32 {
@@ -191,6 +176,10 @@ pub struct Extinction;
 impl Property for Extinction {
 	fn get_name(&self) -> String {
 		String::from("Współczynnik absorbcji")
+	}
+
+	fn get_show_negative(&self) -> bool {
+		false
 	}
 
 	fn get_unit(&self) -> String {
