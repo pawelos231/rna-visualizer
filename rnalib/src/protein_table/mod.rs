@@ -4,46 +4,14 @@ use std::{
 	thread::scope,
 };
 
+mod key;
+use key::Key;
+
 use crate::*;
 
 #[derive(Default)]
 pub struct ProteinMap {
 	proteins: BTreeMap<Key, Protein>,
-}
-
-pub struct Key(pub String);
-
-impl PartialEq for Key {
-	fn eq(&self, other: &Self) -> bool {
-		self.0.len() == other.0.len() && self.0 == other.0
-	}
-}
-
-impl Eq for Key {}
-
-impl PartialOrd for Key {
-	fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-		use std::cmp::Ordering::*;
-		match self.0.len().partial_cmp(&other.0.len()) {
-			None => None,
-			Some(ord) => match ord {
-				Less => Some(Less),
-				Greater => Some(Greater),
-				Equal => self.0.partial_cmp(&other.0),
-			},
-		}
-	}
-}
-
-impl Ord for Key {
-	fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-		use std::cmp::Ordering::*;
-		match self.0.len().cmp(&other.0.len()) {
-			Less => Less,
-			Greater => Greater,
-			Equal => self.0.cmp(&other.0),
-		}
-	}
 }
 
 impl ProteinMap {
@@ -82,7 +50,8 @@ impl ProteinMap {
 		const SPACE: u8 = b' ';
 
 		let mut result = BTreeMap::new();
-		let mut current = Protein::from(Vec::with_capacity(30000));
+		let mut current = Vec::with_capacity(30000);
+		let mut current_str = String::with_capacity(30000);
 		let mut protein = false;
 
 		let mut iter = source
@@ -101,13 +70,17 @@ impl ProteinMap {
 
 			if protein && acid == STOP {
 				if !current.is_empty() {
-					result.insert(Key(current.to_string()), current.clone());
-					current.clear();
+					current.shrink_to_fit();
+					current_str.shrink_to_fit();
+					result.insert(Key(current_str), Protein::from(current));
+					current = Vec::with_capacity(30000);
+					current_str = String::with_capacity(30000);
 				}
 				protein = false;
 			}
 
 			if protein {
+				current_str.push(codon.get_acid_shorthand());
 				current.push(codon);
 			}
 

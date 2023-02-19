@@ -32,6 +32,10 @@ impl Acid {
 			extco,
 		}
 	}
+
+	pub const fn get_shorthand_raw(&self) -> u8 {
+		self.three_letter.as_bytes()[0]
+	}
 }
 
 impl Display for Acid {
