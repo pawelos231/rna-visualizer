@@ -16,6 +16,7 @@ pub use acid_painter::*;
 
 mod protein_cache;
 pub use protein_cache::*;
+
 use rnalib::Protein;
 
 use super::extras::Extras;
@@ -41,6 +42,17 @@ impl ProteinViewer {
 		self.show_protein(ui);
 	}
 
+	fn determine_base(previous: bool, next: bool, shorthand: char) -> BaseType {
+		match (previous, next, shorthand) {
+			(false, false, 'p' | 'P') => BaseType::BASE_P,
+			(false, true, 'p' | 'P') => BaseType::BASE_P_NO_RIGHT,
+			(false, false, _) => BaseType::BASE,
+			(false, true, _) => BaseType::BASE_NO_RIGHT,
+			(true, false, _) => BaseType::BASE_NO_LEFT,
+			(true, true, _) => BaseType::BASE_NO_SIDES,
+		}
+	}
+
 	fn show_protein(&mut self, ui: &mut Ui) {
 		let Some(protein) = &self.protein else { return };
 		ScrollArea::horizontal().show(ui, |ui| {
@@ -55,28 +67,14 @@ impl ProteinViewer {
 				while let Some(codon) = current {
 					let next = codon_iter.next();
 
-					let shorthand = codon.get_acid_shorthand();
 					let cache = &mut self.cache;
-					let base_type = match (
-						previous.is_some(),
-						next.is_some(),
-						shorthand.to_ascii_lowercase(),
-					) {
-						(false, false, 'p') => BaseType::BASE_P,
-						(false, true, 'p') => BaseType::BASE_P_NO_RIGHT,
-						(false, false, _) => BaseType::BASE,
-						(false, true, _) => BaseType::BASE_NO_RIGHT,
-						(true, false, _) => BaseType::BASE_NO_LEFT,
-						(true, true, _) => BaseType::BASE_NO_SIDES,
-					};
+					let shorthand = codon.get_acid_shorthand();
+					let next_shorthand = next.map(|x| x.get_acid_shorthand());
+					let base_type =
+						Self::determine_base(previous.is_some(), next.is_some(), shorthand);
 
-					self.painter.show(
-						ui,
-						cache,
-						base_type,
-						shorthand,
-						next.map(|x| x.get_acid_shorthand()),
-					);
+					self.painter
+						.show(ui, cache, base_type, shorthand, next_shorthand);
 
 					previous = current;
 					current = next;

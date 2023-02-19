@@ -83,10 +83,11 @@ impl AcidPainter {
 		}
 
 		if let Some(next_shorthand) = next_shorthand {
-			let link_type = match next_shorthand.to_ascii_lowercase() {
-				'p' => BaseType::BASE_P_LINK,
+			let link_type = match next_shorthand {
+				'p' | 'P' => BaseType::BASE_P_LINK,
 				_ => BaseType::BASE_LINK,
 			};
+
 			cache.lazy_load_base(link_type);
 			if let Some(link) = cache.get_base(link_type) {
 				ui.add_space(-30.0 * self.scale);
