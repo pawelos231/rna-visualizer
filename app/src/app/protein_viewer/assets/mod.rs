@@ -15,7 +15,7 @@ macro_rules! include_bases {
 		#[allow(clippy::upper_case_acronyms)]
 		pub enum BaseType { $($name,)* }
 
-		pub const BASES: [BaseType; 5] = [$(BaseType::$name),*];
+		pub const BASES: [BaseType; 8] = [$(BaseType::$name),*];
 
 		pub fn get_base_svg(base_type: BaseType) -> Option<&'static str> {
 			match base_type {
@@ -87,7 +87,10 @@ include_bases!(
 	BASE_NO_LEFT,
 	BASE_NO_SIDES,
 	BASE_NO_RIGHT,
-	BASE_LINK
+	BASE_LINK,
+	BASE_P,
+	BASE_P_NO_RIGHT,
+	BASE_P_LINK
 );
 
 #[rustfmt::skip]

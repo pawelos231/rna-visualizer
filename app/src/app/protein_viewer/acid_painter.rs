@@ -23,7 +23,7 @@ impl AcidPainter {
 		cache: &mut ProteinCache,
 		base_type: BaseType,
 		shorthand: char,
-		next: bool,
+		next_shorthand: Option<char>,
 	) {
 		cache.lazy_load(shorthand);
 		cache.lazy_load_base(base_type);
@@ -82,9 +82,13 @@ impl AcidPainter {
 			});
 		}
 
-		if next {
-			cache.lazy_load_base(BaseType::BASE_LINK);
-			if let Some(link) = cache.get_base(BaseType::BASE_LINK) {
+		if let Some(next_shorthand) = next_shorthand {
+			let link_type = match next_shorthand.to_ascii_lowercase() {
+				'p' => BaseType::BASE_P_LINK,
+				_ => BaseType::BASE_LINK,
+			};
+			cache.lazy_load_base(link_type);
+			if let Some(link) = cache.get_base(link_type) {
 				ui.add_space(-30.0 * self.scale);
 				ui.vertical(|ui| {
 					ui.add_space(50.0 * self.scale);

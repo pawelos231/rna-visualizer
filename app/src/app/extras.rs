@@ -41,7 +41,7 @@ impl Extras {
 
 		ui.allocate_ui_at_rect(rect.shrink(10.0), |ui| {
 			ui.add_space(-5.0);
-			ui.label(title);
+			ui.add(Label::new(title).wrap(false));
 		});
 
 		ui.add_space(5.0);

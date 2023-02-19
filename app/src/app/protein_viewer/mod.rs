@@ -57,15 +57,26 @@ impl ProteinViewer {
 
 					let shorthand = codon.get_acid_shorthand();
 					let cache = &mut self.cache;
-					let base_type = match (previous.is_some(), next.is_some()) {
-						(false, false) => BaseType::BASE,
-						(false, true) => BaseType::BASE_NO_RIGHT,
-						(true, false) => BaseType::BASE_NO_LEFT,
-						(true, true) => BaseType::BASE_NO_SIDES,
+					let base_type = match (
+						previous.is_some(),
+						next.is_some(),
+						shorthand.to_ascii_lowercase(),
+					) {
+						(false, false, 'p') => BaseType::BASE_P,
+						(false, true, 'p') => BaseType::BASE_P_NO_RIGHT,
+						(false, false, _) => BaseType::BASE,
+						(false, true, _) => BaseType::BASE_NO_RIGHT,
+						(true, false, _) => BaseType::BASE_NO_LEFT,
+						(true, true, _) => BaseType::BASE_NO_SIDES,
 					};
 
-					self.painter
-						.show(ui, cache, base_type, shorthand, next.is_some());
+					self.painter.show(
+						ui,
+						cache,
+						base_type,
+						shorthand,
+						next.map(|x| x.get_acid_shorthand()),
+					);
 
 					previous = current;
 					current = next;
