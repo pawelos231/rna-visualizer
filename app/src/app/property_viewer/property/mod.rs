@@ -2,9 +2,22 @@ use egui::*;
 use rnalib::AminoString;
 use rnalib::Protein;
 
-use super::math::inv_lerp;
-use super::math::lerp;
-use super::math::qerp;
+mod math;
+use math::inv_lerp;
+use math::lerp;
+use math::qerp;
+
+mod charge;
+mod extinction;
+mod hydro;
+mod mass;
+mod pi;
+
+pub use charge::*;
+pub use extinction::*;
+pub use hydro::*;
+pub use mass::*;
+pub use pi::*;
 
 pub trait Property {
 	fn evaluate(protein: &AminoString, x: f32) -> f32;
@@ -21,7 +34,7 @@ pub trait Property {
 		Color32::from_rgb(255, 65, 54)
 	}
 
-	fn generate_cache(protein: &Protein) -> [f32; 100] {
+	fn generate_cache(protein: &AminoString) -> [f32; 100] {
 		let mut cache = [0.0; 100];
 		let unit = protein.len() as f32 / 100.0;
 		(0..100).for_each(|i| {
@@ -111,106 +124,5 @@ pub trait Property {
 			samples[i] = value;
 		});
 		self.show_samples(ui, samples);
-	}
-}
-
-pub struct Mass;
-impl Property for Mass {
-	fn get_name(&self) -> String {
-		String::from("Masa")
-	}
-
-	fn get_unit(&self) -> String {
-		String::from("Dalton")
-	}
-
-	fn get_show_negative(&self) -> bool {
-		false
-	}
-
-	fn evaluate(protein: &AminoString, _x: f32) -> f32 {
-		protein.get_mass()
-	}
-}
-pub struct Pi;
-impl Property for Pi {
-	fn get_name(&self) -> String {
-		String::from("Punkt izoelektryczny")
-	}
-
-	fn get_show_negative(&self) -> bool {
-		false
-	}
-
-	fn get_unit(&self) -> String {
-		String::from("is")
-	}
-
-	fn get_color() -> Color32 {
-		Color32::from_rgb(221, 221, 221)
-	}
-
-	fn evaluate(protein: &AminoString, _x: f32) -> f32 {
-		protein.get_isoletric_point()
-	}
-}
-pub struct NetCharge;
-impl Property for NetCharge {
-	fn get_name(&self) -> String {
-		String::from("Suma ładunków")
-	}
-
-	fn get_unit(&self) -> String {
-		String::from("zakłada ph 7")
-	}
-
-	fn get_color() -> Color32 {
-		Color32::from_rgb(52, 186, 186)
-	}
-
-	fn evaluate(protein: &AminoString, _x: f32) -> f32 {
-		protein.get_neutral_charge()
-	}
-}
-pub struct Extinction;
-impl Property for Extinction {
-	fn get_name(&self) -> String {
-		String::from("Współczynnik absorbcji")
-	}
-
-	fn get_show_negative(&self) -> bool {
-		false
-	}
-
-	fn get_unit(&self) -> String {
-		String::from("M⁻¹ * cm⁻¹")
-	}
-
-	fn get_color() -> Color32 {
-		Color32::from_rgb(255, 220, 0)
-	}
-
-	fn evaluate(protein: &AminoString, _x: f32) -> f32 {
-		protein.get_ext() as f32
-	}
-}
-
-pub struct Hydro;
-impl Property for Hydro {
-	fn get_name(&self) -> String {
-		String::from("Indeks hydrofobowy")
-	}
-
-	fn get_unit(&self) -> String {
-		String::from("Kcal * mol⁻¹")
-	}
-
-	fn get_color() -> Color32 {
-		Color32::from_rgb(0, 116, 217)
-	}
-
-	fn evaluate(protein: &AminoString, x: f32) -> f32 {
-		let n = (x * protein.len() as f32) as usize;
-		protein.get_phob(n)
 	}
 }
