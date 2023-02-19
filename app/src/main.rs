@@ -7,7 +7,6 @@ static GLOBAL: MiMalloc = MiMalloc;
 const ICON: &[u8] = include_bytes!("../icon/icon.bin");
 
 mod app;
-mod fonts;
 
 use app::*;
 

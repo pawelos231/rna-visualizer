@@ -11,16 +11,16 @@ use super::{assets::BaseType, *};
 use crate::app::svg_image::SvgImage;
 
 #[derive(Default)]
-pub struct ProteinCache {
+pub struct ViewerCache {
 	svgs: HashMap<char, ProteinSvg>,
 	base_svgs: HashMap<usize, SvgImage>,
 	loader: ThreadedLoader,
 }
 
-impl ProteinCache {
+impl ViewerCache {
 	pub fn lazy_load(&mut self, shorthand: char) {
 		if let Vacant(entry) = self.svgs.entry(shorthand) {
-			if let Some(svg) = ProteinLoader::load(shorthand) {
+			if let Some(svg) = Loader::load(shorthand) {
 				entry.insert(svg);
 			}
 		}
@@ -28,7 +28,7 @@ impl ProteinCache {
 
 	pub fn lazy_load_base(&mut self, base_type: BaseType) {
 		if let Vacant(entry) = self.base_svgs.entry(base_type as usize) {
-			if let Some(svg) = ProteinLoader::load_base(base_type) {
+			if let Some(svg) = Loader::load_base(base_type) {
 				entry.insert(svg);
 			}
 		}
@@ -89,14 +89,14 @@ impl ThreadedLoader {
 
 		spawn(move || {
 			for i in 65u8..91u8 {
-				if let Some(svg) = ProteinLoader::load(i as char) {
+				if let Some(svg) = Loader::load(i as char) {
 					let mut guard = svgs.lock().unwrap();
 					guard.insert(i as char, svg);
 				}
 			}
 
 			for base in BASES {
-				if let Some(svg) = ProteinLoader::load_base(base) {
+				if let Some(svg) = Loader::load_base(base) {
 					let mut guard = base_svgs.lock().unwrap();
 					guard.insert(base as usize, svg);
 				}

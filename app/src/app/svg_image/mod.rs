@@ -4,15 +4,15 @@ use resvg::render;
 use tiny_skia::Pixmap;
 use usvg::*;
 
-mod svg_bounds;
-use svg_bounds::SvgBounds;
+mod bounds;
+use bounds::Bounds;
 
 #[derive(Clone)]
 pub struct SvgImage {
 	size: [usize; 2],
 	image: Mutex<ColorImage>,
 	texture: Mutex<Option<TextureHandle>>,
-	bounds: SvgBounds,
+	bounds: Bounds,
 }
 
 impl SvgImage {
@@ -25,7 +25,7 @@ impl SvgImage {
 		self.size
 	}
 
-	pub fn get_bounds(&self) -> &SvgBounds {
+	pub fn get_bounds(&self) -> &Bounds {
 		&self.bounds
 	}
 
@@ -85,7 +85,7 @@ impl SvgImage {
 
 struct SvgData {
 	pub image: ColorImage,
-	pub bounds: SvgBounds,
+	pub bounds: Bounds,
 }
 
 fn load_svg_tree(tree: &Tree) -> Result<SvgData, String> {
@@ -100,7 +100,7 @@ fn load_svg_tree(tree: &Tree) -> Result<SvgData, String> {
 	render(tree, FitTo::Original, Default::default(), pixmap.as_mut()).unwrap();
 
 	let image = ColorImage::from_rgba_unmultiplied([width as _, height as _], pixmap.data());
-	let bounds = SvgBounds::new(&tree.root());
+	let bounds = Bounds::new(&tree.root());
 
 	Ok(SvgData { image, bounds })
 }

@@ -2,7 +2,7 @@ use egui::*;
 use native_dialog::FileDialog;
 
 use super::ImportSettings;
-use crate::app::fast_text_edit::FastTextEdit;
+use crate::app::extras::FastTextEdit;
 
 #[derive(Default)]
 pub struct SettingsView {

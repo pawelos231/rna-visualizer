@@ -10,21 +10,18 @@ use import_window::ImportWindow;
 mod protein_selector;
 use protein_selector::ProteinSelector;
 
-mod fast_text_edit;
-use fast_text_edit::FastTextEdit;
-
 mod protein_viewer;
 use protein_viewer::ProteinViewer;
 
-mod colors;
 mod extras;
+use extras::FastTextEdit;
 
 mod property_viewer;
 use property_viewer::PropertyViewer;
 
 mod svg_image;
 
-use crate::fonts;
+mod fonts;
 
 pub type ProteinCollection = ProteinMap;
 

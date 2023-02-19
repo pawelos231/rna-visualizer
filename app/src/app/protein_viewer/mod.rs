@@ -8,14 +8,14 @@ pub use protein_svg::*;
 mod assets;
 pub use assets::*;
 
-mod protein_loader;
-pub use protein_loader::*;
+mod loader;
+pub use loader::*;
 
 mod acid_painter;
 pub use acid_painter::*;
 
-mod protein_cache;
-pub use protein_cache::*;
+mod viewer_cache;
+pub use viewer_cache::*;
 
 use rnalib::Protein;
 
@@ -24,7 +24,7 @@ use super::extras::Extras;
 #[derive(Default)]
 pub struct ProteinViewer {
 	pub protein: Option<Rc<Protein>>,
-	cache: ProteinCache,
+	cache: ViewerCache,
 	painter: AcidPainter,
 }
 

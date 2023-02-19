@@ -3,11 +3,11 @@ use std::cmp::Ordering;
 use usvg::*;
 
 #[derive(Clone)]
-pub struct SvgBounds {
+pub struct Bounds {
 	top: Vec2,
 }
 
-impl SvgBounds {
+impl Bounds {
 	pub fn new(source: &Node) -> Self {
 		let top = Self::find_bounding_vertical(source, Ordering::Less);
 

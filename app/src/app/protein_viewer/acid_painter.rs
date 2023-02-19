@@ -20,7 +20,7 @@ impl AcidPainter {
 	pub fn show(
 		&mut self,
 		ui: &mut Ui,
-		cache: &mut ProteinCache,
+		cache: &mut ViewerCache,
 		base_type: BaseType,
 		shorthand: char,
 		next_shorthand: Option<char>,

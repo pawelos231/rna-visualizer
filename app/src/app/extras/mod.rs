@@ -1,6 +1,10 @@
 use egui::*;
 
-use super::colors::*;
+mod colors;
+mod fast_text_edit;
+
+use colors::*;
+pub use fast_text_edit::*;
 
 pub struct Extras;
 
