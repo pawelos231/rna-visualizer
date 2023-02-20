@@ -9,7 +9,7 @@ impl Property for NetCharge {
 	}
 
 	fn get_unit(&self) -> String {
-		String::from("zakłada ph 7")
+		String::from("zakłada pH 7")
 	}
 
 	fn get_color() -> Color32 {

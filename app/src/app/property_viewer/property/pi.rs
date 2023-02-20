@@ -13,7 +13,7 @@ impl Property for Pi {
 	}
 
 	fn get_unit(&self) -> String {
-		String::from("is")
+		String::from("wartość pH")
 	}
 
 	fn get_color() -> Color32 {

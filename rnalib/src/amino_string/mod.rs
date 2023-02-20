@@ -26,6 +26,7 @@ impl AminoString {
 		self.counts.add_raw(short);
 		self.codons.push(codon);
 	}
+
 	pub fn slice(&self, start: usize, length: usize) -> Self {
 		Self::from(
 			self.codons
