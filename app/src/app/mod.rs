@@ -84,7 +84,7 @@ impl eframe::App for App {
 				ui.label("Ciąg RNA:");
 				FastTextEdit::singleline(ui, &mut self.rna);
 				if ui.button("Wczytaj").clicked() {
-					self.proteins = ProteinMap::parse_multithreaded(&self.rna);
+					self.proteins = ProteinMap::parse(self.rna.to_string());
 					self.protein_selector.clear_cache();
 				};
 				if ui.button("Wytnij niepoprawne znaki").clicked() {
