@@ -1,35 +1,29 @@
-use std::{
-	collections::HashMap,
-	fmt::{Display, Write},
-};
+use std::fmt::{Display, Write};
+
+mod counts;
+use counts::Counts;
 
 use crate::{Acid, Codon, Nucleotide, Protein};
 
 #[derive(Default, Clone)]
 pub struct AminoString {
 	codons: Vec<Codon>,
-	counts: HashMap<char, u32>,
+	counts: Counts,
 }
 
 impl AminoString {
 	pub fn from(codons: Vec<Codon>) -> Self {
-		let mut counts = HashMap::new();
+		let mut counts = Counts::default();
 		for codon in &codons {
-			let short = codon.get_acid_shorthand();
-			match counts.get(&short) {
-				Some(k) => counts.insert(short, k + 1),
-				None => counts.insert(short, 1),
-			};
+			let short = codon.get_acid_shorthand_raw();
+			counts.add_raw(short);
 		}
 		Self { codons, counts }
 	}
 
 	pub fn push(&mut self, codon: Codon) {
-		let short = codon.get_acid_shorthand();
-		match self.counts.get(&short) {
-			Some(k) => self.counts.insert(short, k + 1),
-			None => self.counts.insert(short, 1),
-		};
+		let short = codon.get_acid_shorthand_raw();
+		self.counts.add_raw(short);
 		self.codons.push(codon);
 	}
 	pub fn slice(&self, start: usize, length: usize) -> Self {
@@ -41,9 +35,6 @@ impl AminoString {
 				.take(length)
 				.collect(),
 		)
-	}
-	pub fn get_codon_count(&self, key: char) -> u32 {
-		*self.counts.get(&key).unwrap_or(&0)
 	}
 
 	pub fn len(&self) -> usize {
@@ -60,7 +51,7 @@ impl AminoString {
 
 	pub fn clear(&mut self) {
 		self.codons.clear();
-		self.counts.clear();
+		self.counts = Counts::default();
 	}
 
 	pub fn get_first(&self) -> Codon {
@@ -74,11 +65,11 @@ impl AminoString {
 	// physical properties
 
 	pub fn get_ext(&self) -> u32 {
-		let cysteines = self.get_codon_count('C');
+		let cysteines = self.counts.get_c();
 		let cystines = (cysteines - (cysteines % 2)) / 2;
 
-		self.get_codon_count('W') * Acid::W.extco.unwrap()
-			+ self.get_codon_count('Y') * Acid::Y.extco.unwrap()
+		self.counts.get_w() * Acid::W.extco.unwrap()
+			+ self.counts.get_y() * Acid::Y.extco.unwrap()
 			+ cystines * Acid::C.extco.unwrap()
 	}
 
@@ -113,17 +104,17 @@ impl AminoString {
 
 		let counts_acids = [
 			(1, self.get_first().get_acid().unwrap().pk1),
-			(self.get_codon_count('D'), Acid::D.pk3.unwrap()),
-			(self.get_codon_count('E'), Acid::E.pk3.unwrap()),
-			(self.get_codon_count('C'), Acid::C.pk3.unwrap()),
-			(self.get_codon_count('Y'), Acid::Y.pk3.unwrap()),
+			(self.counts.get_d(), Acid::D.pk3.unwrap()),
+			(self.counts.get_e(), Acid::E.pk3.unwrap()),
+			(self.counts.get_c(), Acid::C.pk3.unwrap()),
+			(self.counts.get_y(), Acid::Y.pk3.unwrap()),
 		];
 
 		let counts_bases = [
 			(1, self.get_last().get_acid().unwrap().pk2),
-			(self.get_codon_count('K'), Acid::K.pk3.unwrap()),
-			(self.get_codon_count('R'), Acid::R.pk3.unwrap()),
-			(self.get_codon_count('H'), Acid::H.pk3.unwrap()),
+			(self.counts.get_k(), Acid::K.pk3.unwrap()),
+			(self.counts.get_r(), Acid::R.pk3.unwrap()),
+			(self.counts.get_h(), Acid::H.pk3.unwrap()),
 		];
 
 		for (count, pk) in counts_acids {

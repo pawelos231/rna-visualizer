@@ -1,5 +1,5 @@
 mod acid;
-mod aminostring;
+mod amino_string;
 mod codon;
 mod consts;
 mod nucleotide;
@@ -7,7 +7,7 @@ mod protein;
 mod protein_table;
 
 pub use acid::*;
-pub use aminostring::*;
+pub use amino_string::*;
 pub use codon::*;
 pub use consts::*;
 pub use nucleotide::*;
