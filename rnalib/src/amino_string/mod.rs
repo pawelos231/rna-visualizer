@@ -69,9 +69,9 @@ impl AminoString {
 		let cysteines = self.counts.get_c();
 		let cystines = (cysteines - (cysteines % 2)) / 2;
 
-		self.counts.get_w() * Acid::W.extco.unwrap()
-			+ self.counts.get_y() * Acid::Y.extco.unwrap()
-			+ cystines * Acid::C.extco.unwrap()
+		self.counts.get_w() as u32 * Acid::W.extco.unwrap()
+			+ self.counts.get_y() as u32 * Acid::Y.extco.unwrap()
+			+ cystines as u32 * Acid::C.extco.unwrap()
 	}
 
 	pub fn get_mass(&self) -> f32 {
