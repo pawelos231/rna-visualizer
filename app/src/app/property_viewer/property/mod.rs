@@ -85,7 +85,19 @@ pub trait Property {
 		);
 
 		let mut previous = None;
-		let stroke = Stroke::new(1.0, Self::get_color());
+		let color = Self::get_color();
+		let stroke = Stroke::new(1.1, Self::get_color());
+		let fill = Color32::from_rgb(
+			lerp(color.r() as f32, 32.0, 0.85) as u8,
+			lerp(color.g() as f32, 32.0, 0.85) as u8,
+			lerp(color.b() as f32, 32.0, 0.85) as u8,
+		);
+		let fill = Stroke::new(1.0, fill);
+
+		let zero_y = match self.get_show_negative() {
+			true => rect.center().y,
+			false => rect.bottom(),
+		};
 
 		let end = rect.width() as u32;
 		for i in 0..end {
@@ -103,6 +115,7 @@ pub trait Property {
 				lerp(rect.bottom(), rect.top(), t),
 			);
 
+			painter.line_segment([p, Pos2::new(p.x, zero_y)], fill);
 			painter.line_segment([previous.unwrap_or(p), p], stroke);
 			previous = Some(p);
 		}
