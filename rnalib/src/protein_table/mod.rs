@@ -7,6 +7,8 @@ use std::{
 mod key;
 use key::Key;
 
+pub mod loader;
+
 use crate::*;
 
 #[derive(Default)]
@@ -21,6 +23,10 @@ impl ProteinMap {
 			proteins.insert(Key(protein.to_string()), protein);
 		}
 
+		Self { proteins }
+	}
+
+	pub fn from(proteins: BTreeMap<Key, Protein>) -> Self {
 		Self { proteins }
 	}
 

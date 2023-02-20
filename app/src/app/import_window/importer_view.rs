@@ -1,12 +1,12 @@
 use std::{
 	fs::File,
 	io::{BufRead, BufReader, Read},
-	sync::atomic::{AtomicBool, Ordering},
+	sync::atomic::{AtomicBool, AtomicU32, Ordering},
 	thread::spawn,
 };
 
 use egui::*;
-use rnalib::ProteinMap;
+use rnalib::{ProteinMap, ThreadedProteinLoader};
 use stringreader::StringReader;
 
 use std::sync::{Arc, Mutex};
@@ -34,8 +34,21 @@ impl ImportView {
 			}
 			false => {
 				ui.label("Importowanie w toku...");
-				if let Some(phase) = self.job.phase() {
-					ui.label(phase.as_str());
+				let progress = self.job.progress();
+				match progress {
+					0 => {
+						ui.label("Filtrowanie pliku wejściowego...");
+					}
+					100 => {
+						ui.label("Indeksowanie wyników...");
+					}
+					_ => {
+						let bar = ProgressBar::new(progress as f32 / 100.0)
+							.animate(true)
+							.show_percentage()
+							.text("Szukanie białek");
+						ui.add(bar);
+					}
 				}
 			}
 		};
@@ -55,7 +68,7 @@ impl ImportView {
 #[derive(Default)]
 struct ImportJob {
 	result: Arc<Mutex<Option<ProteinMap>>>,
-	state: Arc<Mutex<String>>,
+	progress: Arc<AtomicU32>,
 	started: Arc<AtomicBool>,
 	finished: Arc<AtomicBool>,
 }
@@ -65,22 +78,23 @@ impl ImportJob {
 		self.started.store(true, Ordering::Relaxed);
 		self.finished.store(false, Ordering::Relaxed);
 
-		let state = self.state.clone();
+		let progess = self.progress.clone();
 		let result = self.result.clone();
 		let finished = self.finished.clone();
 
 		spawn(move || {
-			if let Ok(mut guard) = state.lock() {
-				*guard = String::from("Filtrowanie pliku wejściowego...");
-			}
-
 			let source = Self::generate_output(&settings);
 
-			if let Ok(mut guard) = state.lock() {
-				*guard = String::from("Wczytywanie białek...");
+			let mut importer = ThreadedProteinLoader::default();
+			importer.start(source);
+
+			while !importer.is_ready() {
+				let percentage = importer.get_progress() * 100.0;
+				let percentage = percentage.min(100.0) as u32;
+				progess.store(percentage, Ordering::Relaxed);
 			}
 
-			let map = ProteinMap::parse_multithreaded(&source);
+			let map = importer.take().unwrap();
 
 			let mut guard = result.lock().unwrap();
 			*guard = Some(map);
@@ -97,9 +111,8 @@ impl ImportJob {
 		self.started.load(Ordering::Relaxed)
 	}
 
-	pub fn phase(&self) -> Option<std::sync::MutexGuard<'_, String>> {
-		let Ok(guard) = self.state.lock() else { return None };
-		Some(guard)
+	pub fn progress(&self) -> u32 {
+		self.progress.load(Ordering::Relaxed)
 	}
 
 	pub fn pop(&mut self) -> Option<ProteinMap> {

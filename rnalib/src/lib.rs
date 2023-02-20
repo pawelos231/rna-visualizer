@@ -12,4 +12,5 @@ pub use codon::*;
 pub use consts::*;
 pub use nucleotide::*;
 pub use protein::*;
+pub use protein_table::loader::*;
 pub use protein_table::*;
