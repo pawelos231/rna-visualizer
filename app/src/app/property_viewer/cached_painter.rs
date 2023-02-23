@@ -57,7 +57,7 @@ impl<T: Property + 'static> CachedPainter<T> {
 		let time = SystemTime::now()
 			.duration_since(self.prev_t)
 			.unwrap_or_default()
-			.mul(10)
+			.mul(20)
 			.as_secs_f32()
 			.clamp(0.0, 1.0);
 

@@ -45,15 +45,13 @@ pub trait Property {
 		cache
 	}
 
-	fn show_bg(ui: &mut Ui, rect: Rect) {
-		let painter = ui.painter();
-
-		painter.rect(
-			rect,
-			Rounding::default(),
-			Color32::from_gray(28),
-			Stroke::new(2.0, Color32::from_gray(22)),
-		);
+	fn show(&self, protein: &Protein, ui: &mut Ui) {
+		let mut samples = [0.0; 100];
+		(0..100).for_each(|i| {
+			let value = Self::evaluate(protein, i as f32 / 100.0);
+			samples[i] = value;
+		});
+		self.show_samples(ui, samples);
 	}
 
 	fn show_samples(&self, ui: &mut Ui, samples: PointsCache) {
@@ -61,6 +59,8 @@ pub trait Property {
 		if rect.width() <= 0.0 || rect.height() <= 0.0 {
 			return;
 		}
+
+		let cursor = ui.input().pointer.hover_pos();
 
 		ui.vertical_centered_justified(|ui| ui.label(""));
 
@@ -100,6 +100,15 @@ pub trait Property {
 			false => rect.bottom(),
 		};
 
+		let cx = inv_lerp(
+			rect.left(),
+			rect.right(),
+			cursor.map(|x| x.x).unwrap_or_default(),
+		);
+		let hover_index_x = cx * samples.len() as f32;
+		let mut hover_p = Pos2::ZERO;
+		let mut hover_val = 0.0;
+
 		let end = rect.width() as u32;
 		for i in 0..end {
 			let x = i as f32 / end as f32;
@@ -119,6 +128,24 @@ pub trait Property {
 			painter.line_segment([p, Pos2::new(p.x, zero_y)], fill);
 			painter.line_segment([previous.unwrap_or(p), p], stroke);
 			previous = Some(p);
+
+			if hover_index_x as u32 == index_x as u32 {
+				hover_p = p;
+				hover_val = prev;
+			}
+		}
+
+		if let Some(cursor) = cursor {
+			if rect.contains(cursor.to_vec2().to_pos2()) {
+				painter.circle_filled(hover_p, 3.0, stroke.color);
+				egui::containers::show_tooltip_at_pointer(
+					ui.ctx(),
+					ui.id().with("_HOVER_TOOLTIP"),
+					|ui| {
+						ui.label(format!("{0:.2}", hover_val));
+					},
+				);
+			}
 		}
 
 		ui.allocate_ui_at_rect(Rect::from_points(&[rect.left_top()]), |ui| {
@@ -131,12 +158,14 @@ pub trait Property {
 		);
 	}
 
-	fn show(&self, protein: &Protein, ui: &mut Ui) {
-		let mut samples = [0.0; 100];
-		(0..100).for_each(|i| {
-			let value = Self::evaluate(protein, i as f32 / 100.0);
-			samples[i] = value;
-		});
-		self.show_samples(ui, samples);
+	fn show_bg(ui: &mut Ui, rect: Rect) {
+		let painter = ui.painter();
+
+		painter.rect(
+			rect,
+			Rounding::default(),
+			Color32::from_gray(28),
+			Stroke::new(2.0, Color32::from_gray(22)),
+		);
 	}
 }
