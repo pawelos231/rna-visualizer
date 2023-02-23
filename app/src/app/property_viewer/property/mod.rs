@@ -2,11 +2,6 @@ use egui::*;
 use rnalib::AminoString;
 use rnalib::Protein;
 
-mod math;
-use math::inv_lerp;
-use math::lerp;
-use math::qerp;
-
 mod charge;
 mod extinction;
 mod hydro;
@@ -18,6 +13,12 @@ pub use extinction::*;
 pub use hydro::*;
 pub use mass::*;
 pub use pi::*;
+
+use super::math::inv_lerp;
+use super::math::lerp;
+use super::math::qerp;
+
+pub type PointsCache = [f32; 100];
 
 pub trait Property {
 	fn evaluate(protein: &AminoString, x: f32) -> f32;
@@ -34,7 +35,7 @@ pub trait Property {
 		Color32::from_rgb(255, 65, 54)
 	}
 
-	fn generate_cache(protein: &AminoString) -> [f32; 100] {
+	fn generate_cache(protein: &AminoString) -> PointsCache {
 		let mut cache = [0.0; 100];
 		let unit = protein.len() as f32 / 100.0;
 		(0..100).for_each(|i| {
@@ -50,12 +51,12 @@ pub trait Property {
 		painter.rect(
 			rect,
 			Rounding::default(),
-			Color32::from_gray(32),
-			Stroke::new(2.0, ui.style().visuals.faint_bg_color),
+			Color32::from_gray(28),
+			Stroke::new(2.0, Color32::from_gray(22)),
 		);
 	}
 
-	fn show_samples(&self, ui: &mut Ui, samples: [f32; 100]) {
+	fn show_samples(&self, ui: &mut Ui, samples: PointsCache) {
 		let rect = ui.available_rect_before_wrap().shrink(10.0);
 		if rect.width() <= 0.0 || rect.height() <= 0.0 {
 			return;
@@ -81,7 +82,7 @@ pub trait Property {
 		let painter = ui.painter();
 		painter.line_segment(
 			[rect.left_center(), rect.right_center()],
-			Stroke::new(1.0, ui.style().visuals.faint_bg_color),
+			Stroke::new(1.0, ui.style().visuals.code_bg_color),
 		);
 
 		let mut previous = None;

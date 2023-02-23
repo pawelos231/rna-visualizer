@@ -9,9 +9,10 @@ use property::*;
 mod cached_painter;
 use cached_painter::*;
 
+mod math;
+
 use super::extras::Extras;
 
-#[derive(Default)]
 pub struct PropertyViewer {
 	protein: Option<Rc<Protein>>,
 	hydro: CachedPainter<Hydro>,
@@ -23,11 +24,11 @@ pub struct PropertyViewer {
 
 impl PropertyViewer {
 	pub fn set(&mut self, protein: Rc<Protein>) {
-		self.hydro = CachedPainter::new(&Hydro, &protein);
-		self.charge = CachedPainter::new(&NetCharge, &protein);
-		self.extinction = CachedPainter::new(&Extinction, &protein);
-		self.pi = CachedPainter::new(&Pi, &protein);
-		self.mass = CachedPainter::new(&Mass, &protein);
+		self.hydro.set(&protein);
+		self.charge.set(&protein);
+		self.extinction.set(&protein);
+		self.pi.set(&protein);
+		self.mass.set(&protein);
 		self.protein = Some(protein);
 	}
 
@@ -50,5 +51,18 @@ impl PropertyViewer {
 				self.charge.draw(ui);
 				self.mass.draw(ui);
 			});
+	}
+}
+
+impl Default for PropertyViewer {
+	fn default() -> Self {
+		Self {
+			protein: Default::default(),
+			hydro: CachedPainter::new(&Hydro),
+			pi: CachedPainter::new(&Pi),
+			extinction: CachedPainter::new(&Extinction),
+			charge: CachedPainter::new(&NetCharge),
+			mass: CachedPainter::new(&Mass),
+		}
 	}
 }
