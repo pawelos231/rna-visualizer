@@ -38,15 +38,18 @@ impl ImportView {
 				match progress {
 					0 => {
 						ui.label("Filtrowanie pliku wejściowego...");
+						ui.ctx().request_repaint();
 					}
 					100 => {
 						ui.label("Indeksowanie wyników...");
+						ui.ctx().request_repaint();
 					}
 					_ => {
 						let bar = ProgressBar::new(progress as f32 / 100.0)
 							.animate(true)
 							.show_percentage()
 							.text("Szukanie białek");
+						ui.ctx().request_repaint();
 						ui.add(bar);
 					}
 				}
