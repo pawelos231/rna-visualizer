@@ -111,6 +111,8 @@ impl eframe::App for App {
 			let available = ui.available_height();
 			let height = TopBottomPanel::top("DISPLAY_TOP")
 				.resizable(true)
+				.min_height(10.0)
+				.max_height(available - 10.0)
 				.show(ctx, |ui| {
 					self.protein_viewer.show(ui);
 				})

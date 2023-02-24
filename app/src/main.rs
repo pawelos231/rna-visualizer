@@ -5,6 +5,7 @@ use mimalloc::MiMalloc;
 static GLOBAL: MiMalloc = MiMalloc;
 
 const ICON: &[u8] = include_bytes!("../icon/icon.bin");
+use egui::*;
 
 mod app;
 
@@ -17,6 +18,7 @@ fn main() {
 			width: 32,
 			height: 32,
 		}),
+		initial_window_size: Some(Vec2::new(1280.0, 720.0)),
 		vsync: true,
 		..Default::default()
 	};
