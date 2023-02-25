@@ -29,13 +29,16 @@ impl ProteinMap {
 		Self { proteins }
 	}
 
-	pub fn parse(source: String) -> Self {
+	pub fn parse(source: String) -> Result<Self, String> {
 		let mut importer = ThreadedProteinLoader::default();
 		importer.start(source);
 
 		while !importer.is_ready() {}
 
-		importer.take().unwrap()
+		match importer.take() {
+			Some(x) => Ok(x),
+			None => Err(String::from("coś poszło nie tak")),
+		}
 	}
 
 	pub fn get(&self, key: &Key) -> Option<Rc<Protein>> {

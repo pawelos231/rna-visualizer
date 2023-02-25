@@ -28,6 +28,7 @@ pub type ProteinCollection = ProteinMap;
 #[derive(Default)]
 pub struct App {
 	rna: String,
+	error: Option<String>,
 	proteins: ProteinCollection,
 	import_window: ImportWindow,
 	protein_selector: ProteinSelector,
@@ -74,6 +75,17 @@ impl App {
 
 impl eframe::App for App {
 	fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
+		if let Some(x) = &self.error {
+			let temp = x.clone();
+			egui::Window::new("Błąd").show(ctx, |ui| {
+				ui.label(temp);
+				if ui.button("okej").clicked() {
+					self.error = None;
+				}
+			});
+			return;
+		}
+
 		if let Some(map) = self.import_window.show(ctx) {
 			self.protein_selector.clear_cache();
 			self.proteins = map;
@@ -85,8 +97,13 @@ impl eframe::App for App {
 				ui.label("Ciąg RNA:");
 				FastTextEdit::singleline(ui, &mut self.rna);
 				if ui.button("Wczytaj").clicked() {
-					self.proteins = ProteinMap::parse(self.rna.to_string());
-					self.protein_selector.clear_cache();
+					match ProteinMap::parse(self.rna.to_string()) {
+						Ok(x) => {
+							self.proteins = x;
+							self.protein_selector.clear_cache();
+						}
+						Err(x) => self.error = Some(x),
+					};
 				};
 				if ui.button("Wytnij niepoprawne znaki").clicked() {
 					self.rna

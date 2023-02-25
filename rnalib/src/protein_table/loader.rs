@@ -4,7 +4,7 @@ use std::{
 		atomic::{AtomicBool, AtomicU32, Ordering},
 		Arc, Mutex,
 	},
-	thread::{self},
+	thread,
 };
 
 use crate::{Codon, Nucleotide, Protein, ProteinMap};
@@ -14,6 +14,7 @@ use super::key::Key;
 pub struct ThreadedProteinLoader {
 	result: Arc<Mutex<Option<BTreeMap<Key, Protein>>>>,
 	flags: [Arc<AtomicBool>; 3],
+	error: Arc<AtomicBool>,
 	progress: [Arc<AtomicU32>; 3],
 	stride_len: u32,
 }
@@ -38,19 +39,24 @@ impl ThreadedProteinLoader {
 		let f2 = self.flags[1].clone();
 		let f3 = self.flags[2].clone();
 
+		let e1 = self.error.clone();
+		let e2 = self.error.clone();
+		let e3 = self.error.clone();
+
 		let p1 = self.progress[0].clone();
 		let p2 = self.progress[1].clone();
 		let p3 = self.progress[2].clone();
 
-		thread::spawn(move || Self::load_skip(s1, t1, f1, p1, 0));
-		thread::spawn(move || Self::load_skip(s2, t2, f2, p2, 1));
-		thread::spawn(move || Self::load_skip(s3, t3, f3, p3, 2));
+		thread::spawn(move || Self::load_skip(s1, t1, f1, e1, p1, 0));
+		thread::spawn(move || Self::load_skip(s2, t2, f2, e2, p2, 1));
+		thread::spawn(move || Self::load_skip(s3, t3, f3, e3, p3, 2));
 	}
 
 	pub fn take(&mut self) -> Option<ProteinMap> {
-		if !self.is_ready() {
+		if !self.is_ready() || self.error.load(Ordering::Relaxed) {
 			return None;
 		}
+
 		let lock = self.result.try_lock();
 		match lock {
 			Ok(mut guard) => {
@@ -62,9 +68,10 @@ impl ThreadedProteinLoader {
 	}
 
 	pub fn is_ready(&self) -> bool {
-		self.flags[0].load(Ordering::Relaxed)
+		(self.flags[0].load(Ordering::Relaxed)
 			&& self.flags[1].load(Ordering::Relaxed)
-			&& self.flags[2].load(Ordering::Relaxed)
+			&& self.flags[2].load(Ordering::Relaxed))
+			|| self.error.load(Ordering::Relaxed)
 	}
 
 	pub fn get_progress(&self) -> f32 {
@@ -85,12 +92,15 @@ impl ThreadedProteinLoader {
 		self.progress[0].store(0, Ordering::Relaxed);
 		self.progress[1].store(0, Ordering::Relaxed);
 		self.progress[2].store(0, Ordering::Relaxed);
+
+		self.error.store(false, Ordering::Relaxed)
 	}
 
 	fn load_skip(
 		source: Arc<String>,
 		target: Arc<Mutex<Option<BTreeMap<Key, Protein>>>>,
 		flag: Arc<AtomicBool>,
+		error: Arc<AtomicBool>,
 		progress: Arc<AtomicU32>,
 		skip: usize,
 	) {
@@ -101,11 +111,19 @@ impl ThreadedProteinLoader {
 		let mut current_str = String::with_capacity(30000);
 		let mut protein = false;
 
-		let mut iter = source
-			.as_bytes()
-			.iter()
-			.filter(|&&x| x != SPACE)
-			.map(|&x| Nucleotide::parse_raw(x).unwrap());
+		let mut iter =
+			source.as_bytes().iter().filter(|&&x| x != SPACE).map(
+				|&x| match Nucleotide::parse_raw(x) {
+					Some(x) => x,
+					None => {
+						error.store(true, Ordering::Relaxed);
+						Nucleotide::A
+					}
+				},
+			);
+		if error.load(Ordering::Relaxed) {
+			return;
+		}
 
 		for _ in 0..skip {
 			iter.next();
@@ -138,9 +156,8 @@ impl ThreadedProteinLoader {
 		}
 
 		if let Ok(mut target) = target.lock() {
-			match target.as_mut() {
-				Some(x) => x.append(&mut result),
-				None => (),
+			if let Some(x) = target.as_mut() {
+				x.append(&mut result)
 			}
 		}
 
@@ -163,6 +180,7 @@ impl Default for ThreadedProteinLoader {
 				Arc::new(AtomicU32::new(0)),
 			],
 			stride_len: 0,
+			error: Arc::new(AtomicBool::new(false)),
 		}
 	}
 }
