@@ -163,7 +163,7 @@ impl AminoString {
 				current.push(*codon);
 			}
 
-			if *codon == Codon::START {
+			if *codon == Codon::start() {
 				protein = true;
 			}
 		}

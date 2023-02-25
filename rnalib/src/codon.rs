@@ -2,10 +2,11 @@ use std::fmt::{Display, Write};
 
 use crate::{Acid, Nucleotide};
 
+/// Represents a single DNA sequence codon.
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Codon {
 	STOP,
-	START,
+	M,
 	F,
 	L,
 	S,
@@ -28,6 +29,23 @@ pub enum Codon {
 }
 
 impl Codon {
+	/// Returns the enum representation of the STOP codon.
+	/// This is an abstraction over [`Codon::STOP`], and yields
+	/// the same results.
+	pub const fn stop() -> Codon {
+		Codon::STOP
+	}
+
+	/// Returns the enum representation of the START codon.
+	/// This is an abstraction over [`Codon::M`], and yields
+	/// the same results.
+	pub const fn start() -> Codon {
+		Codon::M
+	}
+
+	/// Constructs a [`Codon`] from three sequential instances
+	/// of [`Nucleotide`].
+	#[doc=include_str!("doc/amino_wheel.svg")]
 	pub const fn new(a: Nucleotide, b: Nucleotide, c: Nucleotide) -> Self {
 		use Nucleotide::*;
 		match (a, b, c) {
@@ -47,7 +65,7 @@ impl Codon {
 			(C, G, _) => Codon::R,
 
 			(A, U, A | C | U) => Codon::I,
-			(A, U, G) => Codon::START,
+			(A, U, G) => Codon::M,
 			(A, C, _) => Codon::T,
 			(A, A, C | U) => Codon::N,
 			(A, A, G | A) => Codon::K,
@@ -69,7 +87,7 @@ impl Codon {
 	pub const fn get_acid_shorthand(&self) -> char {
 		match self {
 			Codon::STOP => '_',
-			Codon::START => 'M',
+			Codon::M => 'M',
 			Codon::F => 'F',
 			Codon::L => 'L',
 			Codon::S => 'S',
