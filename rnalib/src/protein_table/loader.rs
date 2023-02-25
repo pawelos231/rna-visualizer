@@ -1,6 +1,5 @@
 use std::{
 	collections::BTreeMap,
-	mem::swap,
 	sync::{
 		atomic::{AtomicBool, AtomicU32, Ordering},
 		Arc, Mutex,
@@ -13,7 +12,7 @@ use crate::{Codon, Nucleotide, Protein, ProteinMap};
 use super::key::Key;
 
 pub struct ThreadedProteinLoader {
-	result: Arc<Mutex<BTreeMap<Key, Protein>>>,
+	result: Arc<Mutex<Option<BTreeMap<Key, Protein>>>>,
 	flags: [Arc<AtomicBool>; 3],
 	progress: [Arc<AtomicU32>; 3],
 	stride_len: u32,
@@ -52,15 +51,14 @@ impl ThreadedProteinLoader {
 		if !self.is_ready() {
 			return None;
 		}
-
-		let mut new = Arc::new(Mutex::new(BTreeMap::new()));
-
-		swap(&mut self.result, &mut new);
-
-		let Ok(mutex) = Arc::try_unwrap(new) else { return None };
-		let Ok(inner) = mutex.into_inner() else { return None };
-
-		Some(ProteinMap::from(inner))
+		let lock = self.result.try_lock();
+		match lock {
+			Ok(mut guard) => {
+				let map = guard.replace(BTreeMap::new());
+				Some(ProteinMap::from(map.unwrap()))
+			}
+			Err(_) => None,
+		}
 	}
 
 	pub fn is_ready(&self) -> bool {
@@ -78,7 +76,7 @@ impl ThreadedProteinLoader {
 	}
 
 	fn reset(&mut self) {
-		self.result = Arc::new(Mutex::new(BTreeMap::new()));
+		self.result = Arc::new(Mutex::new(Some(BTreeMap::new())));
 
 		self.flags[0].store(false, Ordering::Relaxed);
 		self.flags[1].store(false, Ordering::Relaxed);
@@ -91,7 +89,7 @@ impl ThreadedProteinLoader {
 
 	fn load_skip(
 		source: Arc<String>,
-		target: Arc<Mutex<BTreeMap<Key, Protein>>>,
+		target: Arc<Mutex<Option<BTreeMap<Key, Protein>>>>,
 		flag: Arc<AtomicBool>,
 		progress: Arc<AtomicU32>,
 		skip: usize,
@@ -139,8 +137,11 @@ impl ThreadedProteinLoader {
 			progress.fetch_add(1, Ordering::Relaxed);
 		}
 
-		if let Ok(target) = target.lock().as_mut() {
-			target.append(&mut result);
+		if let Ok(mut target) = target.lock() {
+			match target.as_mut() {
+				Some(x) => x.append(&mut result),
+				None => (),
+			}
 		}
 
 		flag.store(true, Ordering::Relaxed);
@@ -150,7 +151,7 @@ impl ThreadedProteinLoader {
 impl Default for ThreadedProteinLoader {
 	fn default() -> Self {
 		Self {
-			result: Arc::new(Mutex::new(BTreeMap::new())),
+			result: Arc::new(Mutex::new(Some(BTreeMap::new()))),
 			flags: [
 				Arc::new(AtomicBool::new(false)),
 				Arc::new(AtomicBool::new(false)),
