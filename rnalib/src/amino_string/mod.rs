@@ -1,6 +1,7 @@
 use std::fmt::{Display, Write};
 
 mod counts;
+use super::consts::*;
 use counts::Counts;
 
 use crate::{Acid, Codon, Protein};
@@ -15,15 +16,13 @@ impl AminoString {
 	pub fn from(codons: Vec<Codon>) -> Self {
 		let mut counts = Counts::default();
 		for codon in &codons {
-			let short = codon.get_acid_shorthand_raw();
-			counts.add_raw(short);
+			counts.add(codon);
 		}
 		Self { codons, counts }
 	}
 
 	pub fn push(&mut self, codon: Codon) {
-		let short = codon.get_acid_shorthand_raw();
-		self.counts.add_raw(short);
+		self.counts.add(&codon);
 		self.codons.push(codon);
 	}
 
@@ -63,8 +62,6 @@ impl AminoString {
 		*self.codons.last().unwrap()
 	}
 
-	// physical properties
-
 	pub fn get_ext(&self) -> u32 {
 		let cysteines = self.counts.get_c();
 		let cystines = (cysteines - (cysteines % 2)) / 2;
@@ -76,7 +73,7 @@ impl AminoString {
 
 	pub fn get_mass(&self) -> f32 {
 		let codon_len = self.codons.len() as f32;
-		let sum = crate::ALPHA_MASS * codon_len + crate::H2_MASS;
+		let sum = ALPHA_MASS * codon_len + H2_MASS;
 
 		let final_mass: f32 = sum
 			+ self
@@ -154,9 +151,7 @@ impl AminoString {
 		let mut current = Vec::with_capacity(30000);
 		let mut protein = false;
 		for codon in &self.codons {
-			let acid = codon.get_acid_shorthand();
-
-			if acid == Codon::STOP && protein {
+			if *codon == Codon::STOP && protein {
 				if !current.is_empty() {
 					result.push(Protein::from(current.clone()));
 					current.clear();
@@ -168,7 +163,7 @@ impl AminoString {
 				current.push(*codon);
 			}
 
-			if acid == Codon::START {
+			if *codon == Codon::START {
 				protein = true;
 			}
 		}

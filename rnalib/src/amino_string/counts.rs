@@ -1,3 +1,5 @@
+use crate::Codon;
+
 #[derive(Default, Clone, Copy)]
 pub struct Counts {
 	c: u16,
@@ -11,16 +13,16 @@ pub struct Counts {
 }
 
 impl Counts {
-	pub fn add_raw(&mut self, shorthand: u8) {
-		match shorthand {
-			b'c' | b'C' => self.c += 1,
-			b'w' | b'W' => self.w += 1,
-			b'y' | b'Y' => self.y += 1,
-			b'd' | b'D' => self.d += 1,
-			b'e' | b'E' => self.e += 1,
-			b'k' | b'K' => self.k += 1,
-			b'r' | b'R' => self.r += 1,
-			b'h' | b'H' => self.h += 1,
+	pub fn add(&mut self, codon: &Codon) {
+		match codon {
+			Codon::C => self.c += 1,
+			Codon::W => self.w += 1,
+			Codon::Y => self.y += 1,
+			Codon::D => self.d += 1,
+			Codon::E => self.e += 1,
+			Codon::K => self.k += 1,
+			Codon::R => self.r += 1,
+			Codon::H => self.h += 1,
 			_ => (),
 		}
 	}

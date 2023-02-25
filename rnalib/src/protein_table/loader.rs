@@ -96,8 +96,6 @@ impl ThreadedProteinLoader {
 		progress: Arc<AtomicU32>,
 		skip: usize,
 	) {
-		const STOP: u8 = Codon::STOP as u8;
-		const START: u8 = Codon::START as u8;
 		const SPACE: u8 = b' ';
 
 		let mut result = BTreeMap::new();
@@ -109,7 +107,7 @@ impl ThreadedProteinLoader {
 			.as_bytes()
 			.iter()
 			.filter(|&&x| x != SPACE)
-			.map(|&x| Nucleotide::parse_raw(x));
+			.map(|&x| Nucleotide::parse_raw(x).unwrap());
 
 		for _ in 0..skip {
 			iter.next();
@@ -117,9 +115,8 @@ impl ThreadedProteinLoader {
 
 		while let (Some(a), Some(b), Some(c)) = (iter.next(), iter.next(), iter.next()) {
 			let codon = Codon::new(a, b, c);
-			let acid = codon.get_acid_shorthand_raw();
 
-			if protein && acid == STOP {
+			if protein && codon == Codon::STOP {
 				if !current.is_empty() {
 					current.shrink_to_fit();
 					current_str.shrink_to_fit();
@@ -135,7 +132,7 @@ impl ThreadedProteinLoader {
 				current.push(codon);
 			}
 
-			if acid == START {
+			if codon == Codon::START {
 				protein = true;
 			}
 
