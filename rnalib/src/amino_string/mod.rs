@@ -3,7 +3,7 @@ use std::fmt::{Display, Write};
 mod counts;
 use counts::Counts;
 
-use crate::{Acid, Codon, Nucleotide, Protein};
+use crate::{Acid, Codon, Protein};
 
 #[derive(Default, Clone)]
 pub struct AminoString {
@@ -146,32 +146,6 @@ impl AminoString {
 
 	pub fn get_polarity(&self) -> f32 {
 		0.5
-	}
-
-	pub fn parse(source: &str) -> Vec<Self> {
-		let mut temp = [Nucleotide::A, Nucleotide::A, Nucleotide::A];
-		let mut temp_idx = 0;
-
-		let mut res = Vec::new();
-
-		for index in 0..3.min(source.len()) {
-			let mut codons = Vec::with_capacity(source.len() / 3);
-			source
-				.chars()
-				.skip(index)
-				.filter(|x| *x != ' ')
-				.for_each(|x| {
-					temp[temp_idx] = Nucleotide::parse(x).unwrap();
-					temp_idx += 1;
-					if temp_idx == 3 {
-						codons.push(Codon::new(temp[0], temp[1], temp[2]));
-						temp_idx = 0;
-					}
-				});
-			res.push(AminoString::from(codons));
-			temp_idx = 0;
-		}
-		res
 	}
 
 	pub fn get_proteins(&self) -> Vec<Protein> {
