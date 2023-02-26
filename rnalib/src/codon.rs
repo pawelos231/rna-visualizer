@@ -83,7 +83,7 @@ impl Codon {
 	/// Returns physical properties of an amino acid
 	/// coded by this [`Codon`].
 	///
-	/// Returns [`None`] if [`self`] is [`Codon::STOP`].
+	/// Returns [`None`] if this [`Codon`] instance is [`Codon::STOP`].
 	pub const fn get_acid(&self) -> Option<Acid> {
 		Acid::from_shorthand(self.get_acid_shorthand())
 	}
@@ -92,7 +92,7 @@ impl Codon {
 	/// identifying the amino acid encoded by this
 	/// [`Codon`]. Defaults to uppercase letter values.
 	///
-	/// Returns '_' if [`self`] is [`Codon::STOP`].
+	/// Returns '_' if this instance of [`Codon`] is [`Codon::STOP`].
 	pub const fn get_acid_shorthand(&self) -> char {
 		match self {
 			Codon::STOP => '_',

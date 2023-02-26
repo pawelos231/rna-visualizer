@@ -1,5 +1,5 @@
-//! This module contains easy to access, human readable
-//! amino acid constants. See [`Acid`] for more information.
+//! Contains easy to access, human readable amino acid
+//! constants. See [`Acid`] for more information.
 
 use concat_idents::concat_idents;
 use const_str::*;

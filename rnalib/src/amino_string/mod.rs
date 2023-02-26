@@ -3,8 +3,10 @@ use std::fmt::{Display, Write};
 mod counts;
 use counts::Counts;
 
-use crate::{Acid, Codon, Protein};
+use crate::{Acid, Codon};
 
+/// Represents a string of amino acids in a sequence.
+/// Internally, this is an abstraction over [`Vec<Codon>`].
 #[derive(Default, Clone)]
 pub struct AminoString {
 	codons: Vec<Codon>,
@@ -12,6 +14,8 @@ pub struct AminoString {
 }
 
 impl AminoString {
+	/// Constructs an [`AminoString`] from a vector of
+	/// [`Codon`] instances.
 	pub fn from(codons: Vec<Codon>) -> Self {
 		let mut counts = Counts::default();
 		for codon in &codons {
@@ -20,11 +24,18 @@ impl AminoString {
 		Self { codons, counts }
 	}
 
+	/// Pushes a single [`Codon`] into the internal
+	/// [`Vec`].
 	pub fn push(&mut self, codon: Codon) {
 		self.counts.add(&codon);
 		self.codons.push(codon);
 	}
 
+	/// Returns a sub [`AminoString`] contained within
+	/// this instance.
+	///
+	/// The returned data is an owned [`AminoString`]
+	/// created by copying the underlying data.
 	pub fn slice(&self, start: usize, length: usize) -> Self {
 		Self::from(
 			self.codons
@@ -36,31 +47,42 @@ impl AminoString {
 		)
 	}
 
+	/// Returns the length of this [`AminoString`].
 	pub fn len(&self) -> usize {
 		self.codons.len()
 	}
 
+	/// Returns true if the [`AminoString`] is empty.
 	pub fn is_empty(&self) -> bool {
 		self.codons.len() == 0
 	}
 
+	/// Returns a reference to the underlying [`Vec`].
 	pub fn get_codons(&self) -> &Vec<Codon> {
 		&self.codons
 	}
 
+	/// Clears the underlying [`Vec`] and resets [`Counts`]
+	/// to default.
 	pub fn clear(&mut self) {
 		self.codons.clear();
 		self.counts = Counts::default();
 	}
 
+	/// Returns the [`Codon`] at the beginning of the
+	/// amino acid sequence represented by this [`AminoString`].
 	pub fn get_first(&self) -> Codon {
 		self.codons[0]
 	}
 
+	/// Returns the [`Codon`] at the end of the
+	/// amino acid sequence represented by this [`AminoString`].
 	pub fn get_last(&self) -> Codon {
 		*self.codons.last().unwrap()
 	}
 
+	/// Returns the molar extinction coefficient of the amino
+	/// acid represented by this [`AminoString`].
 	pub fn get_ext(&self) -> u32 {
 		let cysteines = self.counts.get_c();
 		let cystines = (cysteines - (cysteines % 2)) / 2;
@@ -70,6 +92,8 @@ impl AminoString {
 			+ cystines as u32 * Acid::C.extco.unwrap()
 	}
 
+	/// Returns the mass of the amino acid represented by this
+	/// [`AminoString`].
 	pub fn get_mass(&self) -> f32 {
 		const H2_MASS: f32 = 18.0105;
 		self.codons
@@ -78,9 +102,15 @@ impl AminoString {
 			.sum::<f32>()
 			+ H2_MASS
 	}
+
+	/// Returns the net charge of the amino acid represented by
+	/// this [`AminoString`] at a neutral pH level.
 	pub fn get_neutral_charge(&self) -> f32 {
 		self.net_charge(7.0)
 	}
+
+	/// Returns the isoelectric point of the amino acid represented
+	/// by this [`AminoString`].
 	pub fn get_isoletric_point(&self) -> f32 {
 		let mut pi = 0.0;
 		for ph in (0..1400).map(|x| x as f32 * 0.01) {
@@ -92,6 +122,8 @@ impl AminoString {
 		pi
 	}
 
+	/// Returns the net charge of the amino acid represented
+	/// by this [`AminoString`] at a given pH level.
 	pub fn net_charge(&self, ph: f32) -> f32 {
 		let mut result = 0.0;
 
@@ -127,6 +159,8 @@ impl AminoString {
 		result
 	}
 
+	/// Returns the hydrophobicity of the amino acid represented
+	/// by this [`AminoString`].
 	pub fn get_phob(&self, _n: usize) -> f32 {
 		let mut hydrophobicity = 7.9;
 		for codon in &self.codons {
@@ -134,35 +168,6 @@ impl AminoString {
 			hydrophobicity += acid_data.sc_phob;
 		}
 		hydrophobicity
-	}
-
-	pub fn get_polarity(&self) -> f32 {
-		0.5
-	}
-
-	pub fn get_proteins(&self) -> Vec<Protein> {
-		let mut result = Vec::new();
-
-		let mut current = Vec::with_capacity(30000);
-		let mut protein = false;
-		for codon in &self.codons {
-			if *codon == Codon::STOP && protein {
-				if !current.is_empty() {
-					result.push(Protein::from(current.clone()));
-					current.clear();
-				}
-				protein = false;
-			}
-
-			if protein {
-				current.push(*codon);
-			}
-
-			if *codon == Codon::start() {
-				protein = true;
-			}
-		}
-		result
 	}
 }
 
