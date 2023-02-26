@@ -1,7 +1,7 @@
 use std::fmt::{Display, Write};
 
 /// Represents one of the four nucleotides
-/// commonly found in DNA sequences.
+/// commonly found in RNA sequences.
 #[derive(Clone, Copy)]
 pub enum Nucleotide {
 	/// Guanine
@@ -19,7 +19,7 @@ impl Nucleotide {
 	/// from a [`char`]. Ignores letter-case. If an unknown
 	/// letter is passed as an argument, returns [`None`].
 	/// Note that the letter 'T' will be interpreted as
-	/// [`Nucleotide::A`], as per RNA to DNA conversion rules.
+	/// [`Nucleotide::A`], as per DNA to RNA conversion rules.
 	pub const fn parse(from: char) -> Option<Self> {
 		use Nucleotide::*;
 		match from {

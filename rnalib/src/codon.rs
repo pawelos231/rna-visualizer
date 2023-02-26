@@ -2,7 +2,7 @@ use std::fmt::{Display, Write};
 
 use crate::{Acid, Nucleotide};
 
-/// Represents a single DNA sequence codon.
+/// Represents a single RNA sequence codon.
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Codon {
 	STOP,
