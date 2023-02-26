@@ -72,16 +72,11 @@ impl AminoString {
 	}
 
 	pub fn get_mass(&self) -> f32 {
-		let codon_len = self.codons.len() as f32;
-		let sum = ALPHA_MASS * codon_len + H2_MASS;
-
-		let final_mass: f32 = sum
-			+ self
-				.codons
-				.iter()
-				.map(|x| x.get_acid().map(|x| x.sc_mass).unwrap_or(0f32))
-				.sum::<f32>();
-		final_mass
+		self.codons
+			.iter()
+			.map(|x| x.get_acid().map(|x| x.sc_mass).unwrap_or(0f32))
+			.sum::<f32>()
+			+ H2_MASS
 	}
 	pub fn get_neutral_charge(&self) -> f32 {
 		self.net_charge(7.0)
