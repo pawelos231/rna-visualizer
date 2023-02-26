@@ -5,12 +5,16 @@ use std::{
 
 use crate::{AminoString, Codon};
 
+/// An abstraction over [`AminoString`] that is
+/// guaranteed to be a proper protein sequence.
 #[derive(Clone)]
 pub struct Protein {
 	string: AminoString,
 }
 
 impl Protein {
+	/// Constructs a [`Protein`] from a vector of
+	/// [`Codon`] instances.
 	pub fn from(codons: Vec<Codon>) -> Self {
 		Self {
 			string: AminoString::from(codons),
