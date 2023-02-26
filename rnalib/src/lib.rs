@@ -6,7 +6,6 @@
 mod acid;
 mod amino_string;
 mod codon;
-mod consts;
 mod nucleotide;
 mod protein;
 mod protein_table;

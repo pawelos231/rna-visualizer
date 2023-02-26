@@ -1,7 +1,6 @@
 use std::fmt::{Display, Write};
 
 mod counts;
-use super::consts::*;
 use counts::Counts;
 
 use crate::{Acid, Codon, Protein};
@@ -72,6 +71,7 @@ impl AminoString {
 	}
 
 	pub fn get_mass(&self) -> f32 {
+		const H2_MASS: f32 = 18.0105;
 		self.codons
 			.iter()
 			.map(|x| x.get_acid().map(|x| x.sc_mass).unwrap_or(0f32))
