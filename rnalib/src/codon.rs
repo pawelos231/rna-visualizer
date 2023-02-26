@@ -30,15 +30,15 @@ pub enum Codon {
 
 impl Codon {
 	/// Returns the enum representation of the STOP codon.
-	/// This is an abstraction over [`Codon::STOP`], and yields
-	/// the same results.
+	///
+	/// This is the same as [`Codon::STOP`].
 	pub const fn stop() -> Codon {
 		Codon::STOP
 	}
 
 	/// Returns the enum representation of the START codon.
-	/// This is an abstraction over [`Codon::M`], and yields
-	/// the same results.
+	///
+	/// This is the same as [`Codon::M`].
 	pub const fn start() -> Codon {
 		Codon::M
 	}
@@ -80,10 +80,19 @@ impl Codon {
 		}
 	}
 
+	/// Returns physical properties of an amino acid
+	/// coded by this [`Codon`].
+	///
+	/// Returns [`None`] if [`self`] is [`Codon::STOP`].
 	pub const fn get_acid(&self) -> Option<Acid> {
 		Acid::from_shorthand(self.get_acid_shorthand())
 	}
 
+	/// Returns the single-letter shorthand uniquely
+	/// identifying the amino acid encoded by this
+	/// [`Codon`]. Defaults to uppercase letter values.
+	///
+	/// Returns '_' if [`self`] is [`Codon::STOP`].
 	pub const fn get_acid_shorthand(&self) -> char {
 		match self {
 			Codon::STOP => '_',

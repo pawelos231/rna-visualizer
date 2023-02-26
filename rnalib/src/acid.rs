@@ -11,7 +11,7 @@ pub struct Acid {
 	/// A three letter shorthand uniquely identifying
 	/// a given amino acid.
 	pub three_letter: &'static str,
-	/// Monoisotopic mass value minus [`ALPHA_MASS`].
+	/// Monoisotopic mass.
 	pub sc_mass: f32,
 	/// The α-carboxyl group value.
 	pub pk1: f32,
