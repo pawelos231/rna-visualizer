@@ -53,7 +53,11 @@ impl SettingsView {
 		ui.label("Wpisz:");
 		ui.horizontal(|ui| {
 			ui.centered_and_justified(|ui| {
-				ui.text_edit_multiline(&mut self.settings.input_rna);
+				ScrollArea::vertical()
+					.min_scrolled_height(72.0)
+					.show(ui, |ui| {
+						ui.text_edit_multiline(&mut self.settings.input_rna);
+					});
 			});
 		});
 	}

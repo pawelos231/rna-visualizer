@@ -136,7 +136,7 @@ impl AminoString {
 		let mut hydrophobicity = 7.9;
 		for codon in &self.codons {
 			let acid_data = Codon::get_acid(codon).unwrap();
-			hydrophobicity += acid_data.sc_hbob;
+			hydrophobicity += acid_data.sc_phob;
 		}
 		hydrophobicity
 	}

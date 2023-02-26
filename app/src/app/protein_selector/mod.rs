@@ -78,7 +78,8 @@ impl ProteinSelector {
 				let size = Extras::measure(ui, &mut end);
 				let margin = ui.available_width()
 					- size.width() - button.rect.width()
-					- ui.spacing().item_spacing.x;
+					- ui.spacing().item_spacing.x
+					- 6.0;
 
 				ui.add_space(margin / 2.0);
 				end(ui);
