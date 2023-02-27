@@ -1,3 +1,5 @@
+//! The graphical user interface root module
+
 use std::rc::Rc;
 
 use eframe::{epaint::Shadow, Frame};

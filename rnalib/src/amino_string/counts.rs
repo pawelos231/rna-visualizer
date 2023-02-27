@@ -1,7 +1,9 @@
+//! The module that implements [`Counts`]
+
 use crate::Codon;
 
 /// A helper struct that counts how many times
-/// a given amino acid appears inside an [`AminoString].
+/// a given amino acid appears inside an [`AminoString`].
 ///
 /// This only counts the occurences of amino acids with
 /// ionisable side chains, i.e. c, w, y, d, e, k, r, h.

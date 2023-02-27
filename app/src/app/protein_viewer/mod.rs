@@ -1,3 +1,5 @@
+//! The module that implements [`ProteinViewer`]
+
 use std::rc::Rc;
 
 use egui::*;
@@ -21,14 +23,19 @@ use rnalib::Protein;
 
 use super::extras::Extras;
 
+/// A ui widget that displays a given protein's structure
 #[derive(Default)]
 pub struct ProteinViewer {
+	/// The protein to display
 	pub protein: Option<Rc<Protein>>,
+	/// Cached texture assets
 	cache: ViewerCache,
+	/// The acid painter
 	painter: AcidPainter,
 }
 
 impl ProteinViewer {
+	/// Draws the current ['ProteinViewer`] to ui.
 	pub fn show(&mut self, ui: &mut Ui) {
 		self.cache.load_threaded();
 
@@ -42,6 +49,8 @@ impl ProteinViewer {
 		self.show_protein(ui);
 	}
 
+	/// Determines the protein base type to use depending on
+	/// whether there exists a preceding / next protein.
 	fn determine_base(previous: bool, next: bool, shorthand: char) -> BaseType {
 		match (previous, next, shorthand) {
 			(false, false, 'p' | 'P') => BaseType::BASE_P,
@@ -53,6 +62,8 @@ impl ProteinViewer {
 		}
 	}
 
+	/// Internal rendering method. Calculates layout and draws
+	/// widgets to the ui accordingly.
 	fn show_protein(&mut self, ui: &mut Ui) {
 		let Some(protein) = &self.protein else { return };
 		ScrollArea::horizontal()

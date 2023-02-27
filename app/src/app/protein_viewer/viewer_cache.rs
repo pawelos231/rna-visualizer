@@ -1,3 +1,5 @@
+//! The module that implements [`ViewerCache`]
+
 use std::{
 	collections::{hash_map::Entry::*, HashMap},
 	sync::{

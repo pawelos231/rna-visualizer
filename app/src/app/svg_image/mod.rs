@@ -1,3 +1,5 @@
+//! The module that implements [`SvgImage`]
+
 use egui::*;
 use mutex::*;
 use resvg::render;
