@@ -1,3 +1,5 @@
+//! The module that implements [`Codon`]
+
 use std::fmt::{Display, Write};
 
 use crate::{Acid, Nucleotide};

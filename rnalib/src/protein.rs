@@ -1,3 +1,5 @@
+//! The module that implements [`Protein`]
+
 use std::{
 	fmt::Display,
 	ops::{Deref, DerefMut},

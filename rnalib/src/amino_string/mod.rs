@@ -1,3 +1,5 @@
+//! The module that implements [`AminoString`]
+
 use std::fmt::{Display, Write};
 
 mod counts;
@@ -9,7 +11,9 @@ use crate::{Acid, Codon};
 /// Internally, this is an abstraction over [`Vec<Codon>`].
 #[derive(Default, Clone)]
 pub struct AminoString {
+	/// Internal data structure
 	codons: Vec<Codon>,
+	/// Internal ionizable amino acid counter
 	counts: Counts,
 }
 

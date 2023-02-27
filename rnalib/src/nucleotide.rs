@@ -1,3 +1,5 @@
+//! The module that implements [`Nucleotide`]
+
 use std::fmt::{Display, Write};
 
 /// Represents one of the four nucleotides

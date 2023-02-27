@@ -1,3 +1,5 @@
+//! The module that implements [`ProteinMap`]
+
 use std::{
 	collections::{btree_map::Keys, BTreeMap},
 	rc::Rc,
@@ -6,7 +8,6 @@ use std::{
 mod key;
 use key::Key;
 
-#[doc(hidden)]
 pub mod loader;
 
 use crate::*;

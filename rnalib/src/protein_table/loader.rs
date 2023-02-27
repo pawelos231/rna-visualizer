@@ -1,3 +1,5 @@
+//! The module that implements [`ThreadedProteinLoader`]
+
 use std::{
 	collections::BTreeMap,
 	sync::{
@@ -11,6 +13,12 @@ use crate::{Codon, Nucleotide, Protein, ProteinMap};
 
 use super::key::Key;
 
+/// A parser that uses system's multithreading capabilities
+/// in order to efficiently load a [`ProteinMap`] from String,
+/// while reporting the progress.
+///
+/// Uses three threads under the hood, one for each ribosome
+/// offset.
 pub struct ThreadedProteinLoader {
 	result: Arc<Mutex<Option<BTreeMap<Key, Protein>>>>,
 	flags: [Arc<AtomicBool>; 3],
@@ -20,6 +28,7 @@ pub struct ThreadedProteinLoader {
 }
 
 impl ThreadedProteinLoader {
+	/// Starts parsing from a given [`String`]
 	pub fn start(&mut self, source: String) {
 		self.reset();
 
@@ -52,6 +61,9 @@ impl ThreadedProteinLoader {
 		thread::spawn(move || Self::load_skip(s3, t3, f3, e3, p3, 2));
 	}
 
+	/// Takes the loaded [`ProteinMap`].
+	///
+	/// Returns [`None`] if there is no [`ProteinMap`] to be taken.
 	pub fn take(&mut self) -> Option<ProteinMap> {
 		if !self.is_ready() || self.error.load(Ordering::Relaxed) {
 			return None;
@@ -67,6 +79,9 @@ impl ThreadedProteinLoader {
 		}
 	}
 
+	/// Returns true if the parser finished loading the
+	/// [`ProteinMap`], or encountered an error and exited
+	/// early.
 	pub fn is_ready(&self) -> bool {
 		(self.flags[0].load(Ordering::Relaxed)
 			&& self.flags[1].load(Ordering::Relaxed)
@@ -74,6 +89,8 @@ impl ThreadedProteinLoader {
 			|| self.error.load(Ordering::Relaxed)
 	}
 
+	/// Returns the normalized progress made by the
+	/// underlying threads.
 	pub fn get_progress(&self) -> f32 {
 		let total = self.stride_len as f32 / 3.0;
 		let p1 = self.progress[0].load(Ordering::Relaxed) / 3;
@@ -82,6 +99,7 @@ impl ThreadedProteinLoader {
 		(p1 + p2 + p3) as f32 / total
 	}
 
+	/// Restores all internal state to default.
 	fn reset(&mut self) {
 		self.result = Arc::new(Mutex::new(Some(BTreeMap::new())));
 
@@ -96,6 +114,8 @@ impl ThreadedProteinLoader {
 		self.error.store(false, Ordering::Relaxed)
 	}
 
+	/// A helper function used to iterate over a [`String`]
+	/// and read all the proteins encoded in it.
 	fn load_skip(
 		source: Arc<String>,
 		target: Arc<Mutex<Option<BTreeMap<Key, Protein>>>>,

@@ -1,7 +1,7 @@
 //! A library for working with complex DNA/RNA sequences.
 //! Provides structures for efficient data storage and manipulation.
 //!
-//! Created as a submission for the [Motorola Science Cup](https://science-cup.pl).
+//! Created as a part of a submission to the [Motorola Science Cup](https://science-cup.pl).
 
 mod acid;
 mod amino_string;
