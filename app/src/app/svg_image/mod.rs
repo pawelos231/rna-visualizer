@@ -7,6 +7,7 @@ use usvg::*;
 mod bounds;
 use bounds::Bounds;
 
+/// An SVG image UI element
 #[derive(Clone)]
 pub struct SvgImage {
 	size: [usize; 2],
@@ -16,24 +17,39 @@ pub struct SvgImage {
 }
 
 impl SvgImage {
+	/// Loads an [`SvgImage`] from a pre-parsed svg tree.
 	pub fn from_svg_tree(tree: &Tree) -> Self {
 		let tree_data = load_svg_tree(tree).unwrap();
 		Self::from_svg_data(tree_data)
 	}
 
+	/// Loads an [`SvgImage`] from pre-generated [`SvgData`].
+	fn from_svg_data(data: SvgData) -> Self {
+		Self {
+			size: data.image.size,
+			image: Mutex::new(data.image),
+			texture: Default::default(),
+			bounds: data.bounds,
+		}
+	}
+
+	/// Returns the size of self as a two-element array
 	pub fn get_size(&self) -> [usize; 2] {
 		self.size
 	}
 
+	/// Returns the [`Bounds`] of self
 	pub fn get_bounds(&self) -> &Bounds {
 		&self.bounds
 	}
 
+	/// Returns the size of self as a [`Vec2`]
 	pub fn get_size_vec2(&self) -> Vec2 {
 		let [w, h] = self.get_size();
 		vec2(w as f32, h as f32)
 	}
 
+	/// Returns the id of the internal texture
 	pub fn texture_id(&self, ctx: &Context) -> TextureId {
 		self.texture
 			.lock()
@@ -45,10 +61,12 @@ impl SvgImage {
 			.id()
 	}
 
+	/// Paints self to the [`Ui`] at native size
 	pub fn show(&self, ui: &mut Ui, scale: f32) -> Response {
 		self.show_size(ui, self.get_size_vec2() * scale)
 	}
 
+	/// Paints self to the [`Ui`] at size specified
 	pub fn show_size(&self, ui: &mut Ui, desired_size: Vec2) -> Response {
 		let (rect, response) = ui.allocate_exact_size(desired_size, Sense::hover());
 		{
@@ -65,6 +83,7 @@ impl SvgImage {
 		response
 	}
 
+	/// Paints self to the [`Ui`] without allocating any space
 	pub fn show_no_alloc(&self, ui: &mut Ui, scale: f32) {
 		let size = self.get_size_vec2();
 		egui::Image::new(self.texture_id(ui.ctx()), size).paint_at(
@@ -72,22 +91,20 @@ impl SvgImage {
 			egui::Rect::from_min_size(ui.next_widget_position(), size * scale),
 		)
 	}
-
-	fn from_svg_data(data: SvgData) -> Self {
-		Self {
-			size: data.image.size,
-			image: Mutex::new(data.image),
-			texture: Default::default(),
-			bounds: data.bounds,
-		}
-	}
 }
 
+/// Data defining an svg image
 struct SvgData {
+	/// The svg image texture
 	pub image: ColorImage,
+	/// Bounds of the image
 	pub bounds: Bounds,
 }
 
+/// Helper function that loads [`SvgData`] from the specified
+/// [`Tree`].
+///
+/// Returns [`Err`] if there was any problem with the input.
 fn load_svg_tree(tree: &Tree) -> Result<SvgData, String> {
 	let mut opt = Options::default();
 	opt.fontdb.load_system_fonts();

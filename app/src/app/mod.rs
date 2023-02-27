@@ -23,20 +23,27 @@ mod svg_image;
 
 mod fonts;
 
-pub type ProteinCollection = ProteinMap;
-
+/// The main program state
 #[derive(Default)]
 pub struct App {
+	/// Quick-input rna string
 	rna: String,
+	/// Error to display
 	error: Option<String>,
-	proteins: ProteinCollection,
+	/// A collection of proteins
+	proteins: ProteinMap,
+	/// The importer window
 	import_window: ImportWindow,
+	/// The protein selector
 	protein_selector: ProteinSelector,
+	/// The protein structure viewer
 	protein_viewer: ProteinViewer,
+	/// The protein property & diagram viewer
 	property_viewer: PropertyViewer,
 }
 
 impl App {
+	/// Creates and sets up a new program window
 	pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
 		cc.egui_ctx.set_pixels_per_point(1.3);
 
@@ -74,16 +81,17 @@ impl App {
 }
 
 impl eframe::App for App {
+	/// Polls events and re-paints the inside of the window frame
 	fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
+		let error_disable = self.error.is_none();
 		if let Some(x) = &self.error {
 			let temp = x.clone();
 			egui::Window::new("Błąd").show(ctx, |ui| {
 				ui.label(temp);
-				if ui.button("okej").clicked() {
+				if ui.button("Ok").clicked() {
 					self.error = None;
 				}
 			});
-			return;
 		}
 
 		if let Some(map) = self.import_window.show(ctx) {
@@ -92,6 +100,7 @@ impl eframe::App for App {
 		}
 
 		TopBottomPanel::top("TOP").show(ctx, |ui| {
+			ui.set_enabled(error_disable);
 			ui.add_space(2.0);
 			ui.horizontal(|ui| {
 				ui.label("Ciąg RNA:");
@@ -119,6 +128,7 @@ impl eframe::App for App {
 		SidePanel::left("left_panel")
 			.min_width(300.0)
 			.show(ctx, |ui| {
+				ui.set_enabled(error_disable);
 				if let Some(selection) = self.protein_selector.show(ui, &self.proteins) {
 					self.protein_viewer.protein = Some(Rc::clone(&selection));
 					self.property_viewer.set(selection);
@@ -126,6 +136,7 @@ impl eframe::App for App {
 			});
 
 		CentralPanel::default().show(ctx, |ui| {
+			ui.set_enabled(error_disable);
 			let available = ui.available_height();
 			let height = TopBottomPanel::top("DISPLAY_TOP")
 				.resizable(true)
@@ -141,6 +152,7 @@ impl eframe::App for App {
 				.resizable(false)
 				.exact_height(available - height + 25.0)
 				.show(ctx, |ui| {
+					ui.set_enabled(error_disable);
 					self.property_viewer.show(ui);
 				});
 		});

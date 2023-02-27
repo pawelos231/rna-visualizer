@@ -2,22 +2,26 @@ use egui::Vec2;
 use std::cmp::Ordering;
 use usvg::*;
 
+/// The bounds of an svg image.
 #[derive(Clone)]
 pub struct Bounds {
+	/// Top of the bounds.
 	top: Vec2,
 }
 
 impl Bounds {
+	/// Creates [`Bounds`] from an svg [`Node`].
 	pub fn new(source: &Node) -> Self {
 		let top = Self::find_bounding_vertical(source, Ordering::Less);
-
 		Self { top }
 	}
 
+	/// Gets the top-most point of the bounds.
 	pub fn get_top(&self) -> Vec2 {
 		self.top
 	}
 
+	/// Searches for the bottom/top-most point in an svg [`Node`].
 	fn find_bounding_vertical(node: &Node, ord: Ordering) -> Vec2 {
 		use PathSegment::*;
 

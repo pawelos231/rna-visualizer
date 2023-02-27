@@ -49,7 +49,7 @@ impl ProteinMap {
 
 		match importer.take() {
 			Some(x) => Ok(x),
-			None => Err(String::from("Wystąpił problem podczas odczytywania pliku. Upewnij się, że dane wejściowe są poprawne, lub skorzystaj z opcji 'wytnij niepoprawne znaki'.")),
+			None => Err(String::from("Wystąpił problem podczas wczytywania białek. Upewnij się, że dane wejściowe są poprawne, lub skonfiguruj importer do usuwania niepoprawnych znaków.")),
 		}
 	}
 
