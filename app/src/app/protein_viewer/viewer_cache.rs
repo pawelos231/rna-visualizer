@@ -12,14 +12,20 @@ use std::{
 use super::{assets::BaseType, *};
 use crate::app::svg_image::SvgImage;
 
+/// Holds cached protein texture data.
 #[derive(Default)]
 pub struct ViewerCache {
+	/// Svgs of protein bodies
 	svgs: HashMap<char, ProteinSvg>,
+	/// Svgs of protein bases
 	base_svgs: HashMap<usize, SvgImage>,
+	/// A multithreaded image loader
 	loader: ThreadedLoader,
 }
 
 impl ViewerCache {
+	/// Starts lazily loading a given protein's asset
+	/// in the background.
 	pub fn lazy_load(&mut self, shorthand: char) {
 		if let Vacant(entry) = self.svgs.entry(shorthand) {
 			if let Some(svg) = Loader::load(shorthand) {
@@ -28,6 +34,8 @@ impl ViewerCache {
 		}
 	}
 
+	/// Starts lazily loading a given base's asset
+	/// in the background.
 	pub fn lazy_load_base(&mut self, base_type: BaseType) {
 		if let Vacant(entry) = self.base_svgs.entry(base_type as usize) {
 			if let Some(svg) = Loader::load_base(base_type) {
@@ -36,6 +44,8 @@ impl ViewerCache {
 		}
 	}
 
+	/// Starts lazily building the cache for all
+	/// assets in the background.
 	pub fn load_threaded(&mut self) {
 		if self.loader.loaded.load(Ordering::Relaxed) && !self.loader.busy {
 			return;
@@ -64,6 +74,8 @@ impl ViewerCache {
 		self.loader.busy = false;
 	}
 
+	/// Starts lazily building the cache for all
+	/// assets in the background.
 	pub fn get(&self, shorthand: char) -> Option<&ProteinSvg> {
 		self.svgs.get(&shorthand)
 	}
@@ -73,6 +85,7 @@ impl ViewerCache {
 	}
 }
 
+/// An image loader that works on a separate thread.
 #[derive(Default)]
 struct ThreadedLoader {
 	svgs: Arc<Mutex<HashMap<char, ProteinSvg>>>,
@@ -82,6 +95,7 @@ struct ThreadedLoader {
 }
 
 impl ThreadedLoader {
+	/// Starts loading all available textures.
 	fn load(&mut self) {
 		self.busy = true;
 
