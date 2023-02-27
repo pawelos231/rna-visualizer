@@ -1,13 +1,6 @@
 //! The module that implements [`ViewerCache`]
 
-use std::{
-	collections::{hash_map::Entry::*, HashMap},
-	sync::{
-		atomic::{AtomicBool, Ordering},
-		Arc, Mutex,
-	},
-	thread::spawn,
-};
+use std::collections::{hash_map::Entry::*, HashMap};
 
 use super::{assets::BaseType, *};
 use crate::app::svg_image::SvgImage;
@@ -28,7 +21,7 @@ impl ViewerCache {
 	/// in the background.
 	pub fn lazy_load(&mut self, shorthand: char) {
 		if let Vacant(entry) = self.svgs.entry(shorthand) {
-			if let Some(svg) = Loader::load(shorthand) {
+			if let Some(svg) = ThreadedLoader::load_body(shorthand) {
 				entry.insert(svg);
 			}
 		}
@@ -38,7 +31,7 @@ impl ViewerCache {
 	/// in the background.
 	pub fn lazy_load_base(&mut self, base_type: BaseType) {
 		if let Vacant(entry) = self.base_svgs.entry(base_type as usize) {
-			if let Some(svg) = Loader::load_base(base_type) {
+			if let Some(svg) = ThreadedLoader::load_base(base_type) {
 				entry.insert(svg);
 			}
 		}
@@ -47,17 +40,17 @@ impl ViewerCache {
 	/// Starts lazily building the cache for all
 	/// assets in the background.
 	pub fn load_threaded(&mut self) {
-		if self.loader.loaded.load(Ordering::Relaxed) && !self.loader.busy {
+		if self.loader.is_ready() && !self.loader.is_busy() {
 			return;
 		}
 
 		let loader = &mut self.loader;
 
-		if !loader.busy {
+		if !loader.is_busy() {
 			loader.load();
 		}
 
-		if loader.loaded.load(Ordering::Relaxed) {
+		if loader.is_ready() {
 			let Ok(guard) = loader.svgs.lock() else { return };
 			for (k, v) in guard.iter() {
 				self.svgs.insert(*k, v.clone());
@@ -71,54 +64,22 @@ impl ViewerCache {
 			return;
 		}
 
-		self.loader.busy = false;
+		self.loader.set_busy(false);
 	}
 
-	/// Starts lazily building the cache for all
-	/// assets in the background.
+	/// Returns the cached protein body svg image, indexed
+	/// by its shorthand.
+	///
+	/// Returns [`None`] if no such body is present in the cache.
 	pub fn get(&self, shorthand: char) -> Option<&ProteinSvg> {
 		self.svgs.get(&shorthand)
 	}
 
+	/// Returns the cached protein base svg image, indexed
+	/// by its shorthand.
+	///
+	/// Returns [`None`] if no such base is present in the cache.
 	pub fn get_base(&self, base_type: BaseType) -> Option<&SvgImage> {
 		self.base_svgs.get(&(base_type as usize))
-	}
-}
-
-/// An image loader that works on a separate thread.
-#[derive(Default)]
-struct ThreadedLoader {
-	svgs: Arc<Mutex<HashMap<char, ProteinSvg>>>,
-	base_svgs: Arc<Mutex<HashMap<usize, SvgImage>>>,
-	loaded: Arc<AtomicBool>,
-	busy: bool,
-}
-
-impl ThreadedLoader {
-	/// Starts loading all available textures.
-	fn load(&mut self) {
-		self.busy = true;
-
-		let svgs = self.svgs.clone();
-		let base_svgs = self.base_svgs.clone();
-		let loaded = self.loaded.clone();
-
-		spawn(move || {
-			for i in 65u8..91u8 {
-				if let Some(svg) = Loader::load(i as char) {
-					let mut guard = svgs.lock().unwrap();
-					guard.insert(i as char, svg);
-				}
-			}
-
-			for base in BASES {
-				if let Some(svg) = Loader::load_base(base) {
-					let mut guard = base_svgs.lock().unwrap();
-					guard.insert(base as usize, svg);
-				}
-			}
-
-			loaded.store(true, Ordering::Relaxed);
-		});
 	}
 }
