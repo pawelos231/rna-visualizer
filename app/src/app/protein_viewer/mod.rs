@@ -55,34 +55,36 @@ impl ProteinViewer {
 
 	fn show_protein(&mut self, ui: &mut Ui) {
 		let Some(protein) = &self.protein else { return };
-		ScrollArea::horizontal().show(ui, |ui| {
-			ui.add_space(ui.available_height() / 2.0 - 60.0 * self.painter.scale);
-			ui.horizontal(|ui| {
-				ui.add_space(50.0);
-				let mut codon_iter = protein.get_codons().iter();
-				let mut previous = None;
-				let mut current = codon_iter.next();
+		ScrollArea::horizontal()
+			.enable_scrolling(ui.is_enabled())
+			.show(ui, |ui| {
+				ui.add_space(ui.available_height() / 2.0 - 60.0 * self.painter.scale);
+				ui.horizontal(|ui| {
+					ui.add_space(50.0);
+					let mut codon_iter = protein.get_codons().iter();
+					let mut previous = None;
+					let mut current = codon_iter.next();
 
-				self.painter.flip = false;
-				while let Some(codon) = current {
-					let next = codon_iter.next();
+					self.painter.flip = false;
+					while let Some(codon) = current {
+						let next = codon_iter.next();
 
-					let cache = &mut self.cache;
-					let shorthand = codon.get_acid_shorthand();
-					let next_shorthand = next.map(|x| x.get_acid_shorthand());
-					let base_type =
-						Self::determine_base(previous.is_some(), next.is_some(), shorthand);
+						let cache = &mut self.cache;
+						let shorthand = codon.get_acid_shorthand();
+						let next_shorthand = next.map(|x| x.get_acid_shorthand());
+						let base_type =
+							Self::determine_base(previous.is_some(), next.is_some(), shorthand);
 
-					self.painter
-						.show(ui, cache, base_type, shorthand, next_shorthand);
+						self.painter
+							.show(ui, cache, base_type, shorthand, next_shorthand);
 
-					previous = current;
-					current = next;
-				}
-				ui.add_space(50.0);
+						previous = current;
+						current = next;
+					}
+					ui.add_space(50.0);
+				});
+				ui.add_space(ui.available_height() - 10.0);
 			});
-			ui.add_space(ui.available_height() - 10.0);
-		});
 		ui.add_space(ui.available_height());
 	}
 }

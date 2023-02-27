@@ -136,7 +136,9 @@ pub trait Property {
 		}
 
 		if let Some(cursor) = cursor {
-			if rect.contains(cursor.to_vec2().to_pos2()) {
+			let hovered = rect.contains(cursor.to_vec2().to_pos2());
+			let enabled = ui.is_enabled();
+			if hovered && enabled {
 				painter.circle_filled(hover_p, 3.0, stroke.color);
 				egui::containers::show_tooltip_at_pointer(
 					ui.ctx(),
