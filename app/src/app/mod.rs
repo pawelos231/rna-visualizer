@@ -128,7 +128,8 @@ impl eframe::App for App {
 		});
 
 		SidePanel::left("left_panel")
-			.min_width(300.0)
+			.min_width(100.0)
+			.default_width(250.0)
 			.show(ctx, |ui| {
 				ui.set_enabled(error_disable);
 				if let Some(selection) = self.protein_selector.show(ui, &self.proteins) {
@@ -144,6 +145,7 @@ impl eframe::App for App {
 				.resizable(true)
 				.min_height(10.0)
 				.max_height(available - 10.0)
+				.default_height(250.0)
 				.show(ctx, |ui| {
 					self.protein_viewer.show(ui);
 				})

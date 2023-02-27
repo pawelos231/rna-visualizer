@@ -131,7 +131,7 @@ pub trait Property {
 
 			if hover_index_x as u32 == index_x as u32 {
 				hover_p = p;
-				hover_val = prev;
+				hover_val = next;
 			}
 		}
 

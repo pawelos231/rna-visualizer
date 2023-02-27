@@ -11,8 +11,6 @@ use std::{
 use super::{assets::*, ProteinSvg};
 use crate::app::svg_image::SvgImage;
 
-mod processor;
-use processor::*;
 use usvg::*;
 
 /// An image loader that works on a separate thread.
@@ -95,7 +93,7 @@ impl ThreadedLoader {
 	/// by its type
 	pub fn load_base(base_type: BaseType) -> Option<SvgImage> {
 		let svg = get_base_svg(base_type)?;
-		let tree = Processor::process_svg(svg);
+		let tree = Self::process_svg(svg);
 		Some(SvgImage::from_svg_tree(&tree))
 	}
 

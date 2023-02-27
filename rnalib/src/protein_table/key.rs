@@ -1,4 +1,4 @@
-//! The module that implements ['Key]] used by [`ProteinMap`]
+//! The module that implements ['Key`] used by [`ProteinMap`]
 
 /// Key used to index entries in a [`ProteinMap`] instance.
 pub struct Key(pub String);
