@@ -35,7 +35,7 @@ pub struct ProteinViewer {
 }
 
 impl ProteinViewer {
-	/// Draws the current ['ProteinViewer`] to ui.
+	/// Draws self to the ui.
 	pub fn show(&mut self, ui: &mut Ui) {
 		self.cache.load_threaded();
 

@@ -1,3 +1,5 @@
+//! The module that implements [`Bounds`]
+
 use egui::Vec2;
 use std::cmp::Ordering;
 use usvg::*;
