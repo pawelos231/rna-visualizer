@@ -10,8 +10,8 @@ pub use protein_svg::*;
 mod assets;
 pub use assets::*;
 
-mod loader;
-pub use loader::*;
+mod threaded_loader;
+pub use threaded_loader::*;
 
 mod acid_painter;
 pub use acid_painter::*;

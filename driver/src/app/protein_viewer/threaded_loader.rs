@@ -1,3 +1,5 @@
+//! The module that implements [`ThreadedLoader`]
+
 use std::{
 	cell::RefMut,
 	collections::HashMap,

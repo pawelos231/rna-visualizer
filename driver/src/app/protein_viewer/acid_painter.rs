@@ -2,8 +2,11 @@ use egui::*;
 
 use super::*;
 
+/// A ui widget that draws a single amino acid.
 pub struct AcidPainter {
+	/// The scale at which to draw
 	pub scale: f32,
+	/// Should the image be flipped?
 	pub flip: bool,
 }
 
