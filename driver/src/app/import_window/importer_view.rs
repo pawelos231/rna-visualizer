@@ -27,7 +27,7 @@ impl ImportView {
 		}
 	}
 
-	pub fn show(&mut self, ui: &mut Ui) -> Option<ProteinMap> {
+	pub fn show(&mut self, ui: &mut Ui) -> Option<Result<ProteinMap, String>> {
 		match self.job.finished() {
 			true => {
 				ui.label("Zaimportowano dane.");
@@ -61,7 +61,7 @@ impl ImportView {
 		}
 
 		if self.job.finished() {
-			return self.job.pop();
+			return self.job.take();
 		}
 
 		None
@@ -74,6 +74,7 @@ struct ImportJob {
 	progress: Arc<AtomicU32>,
 	started: Arc<AtomicBool>,
 	finished: Arc<AtomicBool>,
+	error: Arc<Mutex<Option<String>>>,
 }
 
 impl ImportJob {
@@ -84,6 +85,7 @@ impl ImportJob {
 		let progess = self.progress.clone();
 		let result = self.result.clone();
 		let finished = self.finished.clone();
+		let error = self.error.clone();
 
 		spawn(move || {
 			let source = Self::generate_output(&settings);
@@ -97,10 +99,17 @@ impl ImportJob {
 				progess.store(percentage, Ordering::Relaxed);
 			}
 
-			let map = importer.take().unwrap();
-
-			let mut guard = result.lock().unwrap();
-			*guard = Some(map);
+			match importer.take() {
+				Some(map) => {
+					let mut guard = result.lock().unwrap();
+					*guard = Some(map);
+				}
+				None => {
+					if let Ok(mut lock) = error.lock() {
+						*lock = Some(ProteinMap::ERR_MESSAGE.into());
+					}
+				}
+			}
 
 			finished.store(true, Ordering::Relaxed);
 		});
@@ -118,9 +127,17 @@ impl ImportJob {
 		self.progress.load(Ordering::Relaxed)
 	}
 
-	pub fn pop(&mut self) -> Option<ProteinMap> {
-		let Ok(mut guard) = self.result.lock() else { return None };
-		guard.take()
+	pub fn take(&mut self) -> Option<Result<ProteinMap, String>> {
+		let Ok(mut guard) = self.result.lock() else { return Some(Err(ProteinMap::ERR_MESSAGE.into())) };
+		let Ok(mut lock) = self.error.lock() else { return Some(Err(ProteinMap::ERR_MESSAGE.into()))};
+		match lock.as_ref() {
+			Some(err) => {
+				let err = err.clone();
+				*lock = None;
+				Some(Err(err))
+			}
+			None => guard.take().map(Ok),
+		}
 	}
 
 	fn generate_output(settings: &ImportSettings) -> String {
@@ -170,7 +187,8 @@ impl ImportJob {
 				if matches!(
 					ch,
 					'A' | 'G' | 'C' | 'U' | 'T' | 'a' | 'g' | 'c' | 'u' | 't'
-				) {
+				) || !settings.delete_wrong_chars
+				{
 					result_buffer.push(ch);
 					if rem_separator && result_buffer.ends_with(&settings.separator) {
 						for _ in 0..separator_len {

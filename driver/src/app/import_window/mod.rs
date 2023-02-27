@@ -36,7 +36,7 @@ pub struct ImportWindow {
 }
 
 impl ImportWindow {
-	pub fn show(&mut self, ctx: &Context) -> Option<ProteinMap> {
+	pub fn show(&mut self, ctx: &Context) -> Option<Result<ProteinMap, String>> {
 		let mut open = self.visible;
 		let mut result = None;
 

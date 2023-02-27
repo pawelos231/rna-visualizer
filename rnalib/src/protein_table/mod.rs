@@ -49,7 +49,7 @@ impl ProteinMap {
 
 		match importer.take() {
 			Some(x) => Ok(x),
-			None => Err(String::from("Wystąpił problem podczas wczytywania białek. Upewnij się, że dane wejściowe są poprawne, lub skonfiguruj importer do usuwania niepoprawnych znaków.")),
+			None => Err(String::from(Self::ERR_MESSAGE)),
 		}
 	}
 
@@ -74,4 +74,6 @@ impl ProteinMap {
 	pub fn keys(&self) -> Keys<Key, Protein> {
 		self.proteins.keys()
 	}
+
+	pub const ERR_MESSAGE: &str = "Wystąpił problem podczas wczytywania białek. Upewnij się, że dane wejściowe są poprawne, lub skonfiguruj importer do usuwania niepoprawnych znaków.";
 }

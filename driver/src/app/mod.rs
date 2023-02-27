@@ -97,8 +97,10 @@ impl eframe::App for App {
 		}
 
 		if let Some(map) = self.import_window.show(ctx) {
-			self.protein_selector.clear_cache();
-			self.proteins = map;
+			match map {
+				Ok(map) => self.set_map(map),
+				Err(err) => self.error = Some(err),
+			}
 		}
 
 		TopBottomPanel::top("TOP").show(ctx, |ui| {
@@ -109,11 +111,10 @@ impl eframe::App for App {
 				FastTextEdit::singleline(ui, &mut self.rna);
 				if ui.button("Wczytaj").clicked() {
 					match ProteinMap::parse(self.rna.to_string()) {
-						Ok(x) => {
-							self.proteins = x;
-							self.protein_selector.clear_cache();
+						Ok(map) => {
+							self.set_map(map);
 						}
-						Err(x) => self.error = Some(x),
+						Err(err) => self.error = Some(err),
 					};
 				};
 				if ui.button("Wytnij niepoprawne znaki").clicked() {
@@ -160,5 +161,14 @@ impl eframe::App for App {
 					self.property_viewer.show(ui);
 				});
 		});
+	}
+}
+
+impl App {
+	/// Clears the pagination cache and loads a new
+	/// map of proteins.
+	fn set_map(&mut self, map: ProteinMap) {
+		self.protein_selector.clear_cache();
+		self.proteins = map;
 	}
 }
