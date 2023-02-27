@@ -1,7 +1,6 @@
 //! The module that implements [`AcidPainter`]
 
 use super::*;
-use egui::*;
 
 /// A ui widget that draws a single amino acid.
 pub struct AcidPainter {

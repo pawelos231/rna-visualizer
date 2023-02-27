@@ -23,14 +23,14 @@ use rnalib::Protein;
 
 use super::extras::Extras;
 
-/// A ui widget that displays a given protein's structure
+/// A ui widget that displays a given protein's structure.
 #[derive(Default)]
 pub struct ProteinViewer {
-	/// The protein to display
+	/// The protein to display.
 	pub protein: Option<Rc<Protein>>,
-	/// Cached texture assets
+	/// Cached texture assets.
 	cache: ViewerCache,
-	/// The acid painter
+	/// The acid painter.
 	painter: AcidPainter,
 }
 

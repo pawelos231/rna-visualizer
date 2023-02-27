@@ -1,12 +1,14 @@
+//! The module that implements [`ProteinSelector`]
+
 use std::rc::Rc;
 
 use egui::*;
-use rnalib::Protein;
+use rnalib::{Protein, ProteinMap};
 
 use super::extras::Extras;
 
-type ProteinCollection = super::ProteinMap;
-
+/// A ui widget that displays a list of proteins
+/// to choose from.
 #[derive(Default)]
 pub struct ProteinSelector {
 	page: usize,
@@ -15,9 +17,11 @@ pub struct ProteinSelector {
 }
 
 impl ProteinSelector {
+	/// The number of proteins to draw per page.
 	const PAGINATION: usize = 100;
 
-	pub fn show(&mut self, ui: &mut Ui, proteins: &ProteinCollection) -> Option<Rc<Protein>> {
+	/// Draws self to the ui.
+	pub fn show(&mut self, ui: &mut Ui, proteins: &ProteinMap) -> Option<Rc<Protein>> {
 		let mut result = None;
 		let min_y = ui.cursor().min.y;
 		let max_y = ui.available_height();
@@ -29,18 +33,23 @@ impl ProteinSelector {
 		result
 	}
 
+	/// Clears the cached pagination results.
 	pub fn clear_cache(&mut self) {
 		self.page = 0;
 		self.paginated.clear();
 	}
 
-	fn show_empty_message(&self, ui: &mut Ui, proteins: &ProteinCollection) {
+	/// A helper function that displays an appropriate message
+	/// if no proteins have been loaded.
+	fn show_empty_message(&self, ui: &mut Ui, proteins: &ProteinMap) {
 		if proteins.keys().len() == 0 {
 			ui.centered_and_justified(|ui| ui.label("Brak białek do wyświetlenia"));
 		};
 	}
 
-	fn update_pagination(&mut self, proteins: &ProteinCollection) {
+	/// A helper function that paginates results into chunks
+	/// of [`ProteinSelector::PAGINATION`] items size each.
+	fn update_pagination(&mut self, proteins: &ProteinMap) {
 		self.paginated.clear();
 		self.last_render_page = self.page;
 
@@ -54,7 +63,9 @@ impl ProteinSelector {
 		}
 	}
 
-	fn show_pagination_header(&mut self, ui: &mut Ui, proteins: &ProteinCollection) {
+	/// A helper function that shows the controls necessary
+	/// to navigate between pages.
+	fn show_pagination_header(&mut self, ui: &mut Ui, proteins: &ProteinMap) {
 		let pages = proteins.keys().len() / Self::PAGINATION;
 		if pages > 0 {
 			Extras::title_bar(ui, "Wybór białka");
@@ -95,10 +106,11 @@ impl ProteinSelector {
 		}
 	}
 
+	/// A helper function that shows the paginated items.
 	fn show_paginated_items(
 		&mut self,
 		ui: &mut Ui,
-		proteins: &ProteinCollection,
+		proteins: &ProteinMap,
 		min_y: f32,
 		max_y: f32,
 	) -> Option<Rc<Protein>> {
