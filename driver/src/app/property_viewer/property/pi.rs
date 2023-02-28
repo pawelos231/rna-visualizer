@@ -1,3 +1,5 @@
+//! The module that defines [`Pi`]
+
 use super::Property;
 use egui::Color32;
 use rnalib::AminoString;

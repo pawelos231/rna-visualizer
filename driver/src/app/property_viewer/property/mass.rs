@@ -1,3 +1,5 @@
+//! The module that defines [`Mass`]
+
 use super::Property;
 use rnalib::AminoString;
 

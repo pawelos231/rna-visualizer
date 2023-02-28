@@ -1,3 +1,5 @@
+//! Contains custom color definitions
+
 use egui::*;
 
 pub struct Colors;

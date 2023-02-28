@@ -1,3 +1,5 @@
+//! The module that implements [`FastTextEdit`]
+
 use egui::*;
 
 pub struct FastTextEdit;

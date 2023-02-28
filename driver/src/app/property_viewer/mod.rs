@@ -1,3 +1,5 @@
+//! The module that implements [`PropertyViewer`]
+
 use std::rc::Rc;
 
 use egui::*;
@@ -13,6 +15,8 @@ mod math;
 
 use super::extras::Extras;
 
+/// A ui widget that displays a list of protein
+/// properties.
 pub struct PropertyViewer {
 	protein: Option<Rc<Protein>>,
 	hydro: CachedPainter<Hydro>,
@@ -23,6 +27,7 @@ pub struct PropertyViewer {
 }
 
 impl PropertyViewer {
+	/// Sets the protein to view the properties of.
 	pub fn set(&mut self, protein: Rc<Protein>) {
 		self.hydro.set(&protein);
 		self.charge.set(&protein);
@@ -32,6 +37,7 @@ impl PropertyViewer {
 		self.protein = Some(protein);
 	}
 
+	/// Draws self to the ui.
 	pub fn show(&mut self, ui: &mut Ui) {
 		let Some(_) = &self.protein else {
 			ui.centered_and_justified(|ui| ui.label("Brak danych"));

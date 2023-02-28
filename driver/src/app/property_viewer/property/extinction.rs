@@ -1,3 +1,5 @@
+//! The module that defines [`Extinction`]
+
 use super::Property;
 use egui::Color32;
 use rnalib::AminoString;

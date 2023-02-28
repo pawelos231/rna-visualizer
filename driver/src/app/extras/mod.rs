@@ -1,3 +1,5 @@
+//! Contains common utility submodules
+
 use egui::*;
 
 mod colors;

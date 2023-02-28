@@ -1,3 +1,5 @@
+//! The module that defines [`Property`]
+
 use egui::*;
 use rnalib::AminoString;
 use rnalib::Protein;
@@ -21,20 +23,28 @@ use super::math::qerp;
 pub type PointsCache = [f32; 100];
 
 pub trait Property {
+	/// Evaluate the property value of [`AminoString`]
+	/// at x value.
 	fn evaluate(protein: &AminoString, x: f32) -> f32;
 
+	/// Returns the name of the property.
 	fn get_name(&self) -> String;
 
+	/// Returns the unit of the property.
 	fn get_unit(&self) -> String;
 
+	/// Returns whether the property can evaluate to negative numbers.
 	fn get_show_negative(&self) -> bool {
 		true
 	}
 
+	/// Returns the color in which the property should be plotted.
 	fn get_color() -> Color32 {
 		Color32::from_rgb(255, 65, 54)
 	}
 
+	/// Generates the property cache by sampling an [`AminoString`]
+	/// along its entire length.
 	fn generate_cache(protein: &AminoString) -> PointsCache {
 		let mut cache = [0.0; 100];
 		let unit = protein.len() as f32 / 100.0;
@@ -45,6 +55,7 @@ pub trait Property {
 		cache
 	}
 
+	/// Draws self to the ui.
 	fn show(&self, protein: &Protein, ui: &mut Ui) {
 		let mut samples = [0.0; 100];
 		(0..100).for_each(|i| {
@@ -54,6 +65,8 @@ pub trait Property {
 		self.show_samples(ui, samples);
 	}
 
+	/// A helper function that draws a chart depicting
+	/// sampled values to the ui.
 	fn show_samples(&self, ui: &mut Ui, samples: PointsCache) {
 		let rect = ui.available_rect_before_wrap().shrink(10.0);
 		if rect.width() <= 0.0 || rect.height() <= 0.0 {
@@ -160,6 +173,7 @@ pub trait Property {
 		);
 	}
 
+	/// A helper function that draws a chart's background.
 	fn show_bg(ui: &mut Ui, rect: Rect) {
 		let painter = ui.painter();
 

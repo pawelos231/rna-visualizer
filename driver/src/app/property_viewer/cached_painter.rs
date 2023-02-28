@@ -1,8 +1,13 @@
+//! The module that implements [`CachedPainter`]
+
 use egui::{text::*, *};
 use rnalib::AminoString;
 
 use super::property::{PointsCache, Property};
 
+/// A ui widget that displays a protein's property
+/// by sampling it across its length and caching
+/// the results
 pub struct CachedPainter<T: Property + 'static> {
 	drawer: Option<&'static T>,
 	cache: PointsCache,
@@ -10,6 +15,8 @@ pub struct CachedPainter<T: Property + 'static> {
 }
 
 impl<T: Property + 'static> CachedPainter<T> {
+	/// Constructs a new [`CachedPainter`] for the property
+	/// specified.
 	pub fn new(imp: &'static T) -> Self {
 		Self {
 			drawer: Some(imp),
@@ -18,11 +25,14 @@ impl<T: Property + 'static> CachedPainter<T> {
 		}
 	}
 
+	/// Samples an [`AminoString`] across 100 evenly spaced
+	/// points and caches the results internally.
 	pub fn set(&mut self, protein: &AminoString) {
 		self.cache = <T as Property>::generate_cache(protein);
 		self.result = <T as Property>::evaluate(protein, 1.1);
 	}
 
+	/// Draws self to the ui.
 	pub fn draw(&self, ui: &mut Ui) {
 		let Some(drawer) = self.drawer else { return };
 		let mut job = LayoutJob::default();
