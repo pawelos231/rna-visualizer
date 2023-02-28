@@ -1,3 +1,5 @@
+//! The module that implements [`ImportSettings`]
+
 use egui::*;
 use rnalib::ProteinMap;
 
@@ -18,8 +20,14 @@ pub struct ImportSettings {
 	path: String,
 }
 
+/// Enum representing the states of an import
+/// window.
 enum View {
+	/// A state that allows the user to configure
+	/// the import settings.
 	Settings(SettingsView),
+	/// A state that allows the user to peek
+	/// into the importer's progress.
 	Import(ImportView),
 }
 
@@ -29,6 +37,8 @@ impl Default for View {
 	}
 }
 
+/// A ui window that displays an advanced
+/// import configuration.
 #[derive(Default)]
 pub struct ImportWindow {
 	pub visible: bool,
@@ -36,6 +46,7 @@ pub struct ImportWindow {
 }
 
 impl ImportWindow {
+	/// Shows self on the ui context.
 	pub fn show(&mut self, ctx: &Context) -> Option<Result<ProteinMap, String>> {
 		let mut open = self.visible;
 		let mut result = None;

@@ -1,15 +1,20 @@
+//! The module that implements [`SettingsView`]
+
 use egui::*;
 use native_dialog::FileDialog;
 
 use super::ImportSettings;
 use crate::app::extras::FastTextEdit;
 
+/// A window view that allows the user to configure
+/// the import settings.
 #[derive(Default)]
 pub struct SettingsView {
 	pub settings: ImportSettings,
 }
 
 impl SettingsView {
+	/// Draws self to the ui.
 	pub fn show(&mut self, ui: &mut Ui) -> bool {
 		self.show_source_select(ui);
 		match self.settings.from_file {
@@ -20,6 +25,8 @@ impl SettingsView {
 		self.show_import(ui)
 	}
 
+	/// A helper function that displays the input
+	/// source section.
 	fn show_source_select(&mut self, ui: &mut Ui) {
 		ui.label(RichText::new("Ustawienia źródła:").strong());
 		ui.horizontal(|ui| {
@@ -28,6 +35,8 @@ impl SettingsView {
 		});
 	}
 
+	/// A helper function that displays the file
+	/// path section.
 	fn show_file_select(&mut self, ui: &mut Ui) {
 		ui.label("Ścieżka pliku: ");
 		ui.horizontal(|ui| {
@@ -49,6 +58,8 @@ impl SettingsView {
 		});
 	}
 
+	/// A helper function that displays the manual
+	/// input section.
 	fn show_rna_input(&mut self, ui: &mut Ui) {
 		ui.label("Wpisz:");
 		ui.horizontal(|ui| {
@@ -62,6 +73,8 @@ impl SettingsView {
 		});
 	}
 
+	/// A helper function that displays the pre-processor
+	/// settings section.
 	fn show_preprocessing_opts(&mut self, ui: &mut Ui) {
 		ui.separator();
 		ui.label(RichText::new("Ustawienia preprocesora:").strong());
@@ -84,6 +97,8 @@ impl SettingsView {
 		});
 	}
 
+	/// A helper function that displays the import
+	/// button and its separator.
 	fn show_import(&mut self, ui: &mut Ui) -> bool {
 		ui.separator();
 		ui.button("Importuj").clicked()

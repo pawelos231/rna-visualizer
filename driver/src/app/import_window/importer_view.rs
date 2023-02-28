@@ -1,3 +1,5 @@
+//! The module that implements [`ImportView`]
+
 use std::{
 	fs::File,
 	io::{BufRead, BufReader, Read},
@@ -13,6 +15,8 @@ use std::sync::{Arc, Mutex};
 
 use super::ImportSettings;
 
+/// A window view that allows the user to peek
+/// into the importer's progress.
 #[derive(Default)]
 pub struct ImportView {
 	pub settings: ImportSettings,
@@ -20,6 +24,8 @@ pub struct ImportView {
 }
 
 impl ImportView {
+	/// Creates a new instance of [`ImportView`],
+	/// with the default settings provided
 	pub fn new(settings: ImportSettings) -> Self {
 		Self {
 			settings,
@@ -27,6 +33,7 @@ impl ImportView {
 		}
 	}
 
+	/// Draws self to the ui.
 	pub fn show(&mut self, ui: &mut Ui) -> Option<Result<ProteinMap, String>> {
 		match self.job.finished() {
 			true => {
@@ -68,6 +75,8 @@ impl ImportView {
 	}
 }
 
+/// A multithreaded import job, that keeps track
+/// of current progress.
 #[derive(Default)]
 struct ImportJob {
 	result: Arc<Mutex<Option<ProteinMap>>>,
@@ -78,6 +87,8 @@ struct ImportJob {
 }
 
 impl ImportJob {
+	/// Starts the job, resetting the internal
+	/// state as necessary.
 	pub fn run(&mut self, settings: ImportSettings) {
 		self.started.store(true, Ordering::Relaxed);
 		self.finished.store(false, Ordering::Relaxed);
@@ -115,18 +126,27 @@ impl ImportJob {
 		});
 	}
 
+	/// Returns true if this job had finished.
 	pub fn finished(&self) -> bool {
 		self.finished.load(Ordering::Relaxed)
 	}
 
+	/// Returns true if this job had started.
 	pub fn started(&self) -> bool {
 		self.started.load(Ordering::Relaxed)
 	}
 
+	/// Returns the current import progress as a
+	/// percentage (natural number from 0 to 100).
 	pub fn progress(&self) -> u32 {
 		self.progress.load(Ordering::Relaxed)
 	}
 
+	/// Takes ownership of the imported [`ProteinMap`].
+	///
+	/// Returns [`None`] if nothing has been imported yet.
+	///
+	/// Returns [`Err`] if there was an error parsing the document.
 	pub fn take(&mut self) -> Option<Result<ProteinMap, String>> {
 		let Ok(mut guard) = self.result.lock() else { return Some(Err(ProteinMap::ERR_MESSAGE.into())) };
 		let Ok(mut lock) = self.error.lock() else { return Some(Err(ProteinMap::ERR_MESSAGE.into()))};
@@ -140,6 +160,8 @@ impl ImportJob {
 		}
 	}
 
+	/// A helper function that filters through the source
+	/// string and pre-processes it according to user settings.
 	fn generate_output(settings: &ImportSettings) -> String {
 		enum Readable<'a> {
 			Fs(File),
