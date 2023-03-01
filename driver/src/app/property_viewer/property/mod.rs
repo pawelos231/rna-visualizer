@@ -2,7 +2,6 @@
 
 use egui::*;
 use rnalib::AminoString;
-use rnalib::Protein;
 
 mod charge;
 mod extinction;
@@ -43,31 +42,22 @@ pub trait Property {
 		Color32::from_rgb(255, 65, 54)
 	}
 
-	/// Generates the property cache by sampling an [`AminoString`]
+	/// Generates a [`PointsCache`] cache by sampling an [`AminoString`]
 	/// along its entire length.
-	fn generate_cache(protein: &AminoString) -> PointsCache {
+	fn sample(protein: &AminoString) -> PointsCache {
 		let mut cache = [0.0; 100];
 		let unit = protein.len() as f32 / 100.0;
 		(0..100).for_each(|i| {
 			let x = unit * i as f32;
 			cache[i] = Self::evaluate(&protein.slice(0, 1 + x as usize), 1.0);
 		});
+		cache[cache.len() - 1] = Self::evaluate(protein, 1.0);
 		cache
-	}
-
-	/// Draws self to the ui.
-	fn show(&self, protein: &Protein, ui: &mut Ui) {
-		let mut samples = [0.0; 100];
-		(0..100).for_each(|i| {
-			let value = Self::evaluate(protein, i as f32 / 100.0);
-			samples[i] = value;
-		});
-		self.show_samples(ui, samples);
 	}
 
 	/// A helper function that draws a chart depicting
 	/// sampled values to the ui.
-	fn show_samples(&self, ui: &mut Ui, samples: PointsCache) {
+	fn show(&self, ui: &mut Ui, samples: PointsCache) {
 		let rect = ui.available_rect_before_wrap().shrink(10.0);
 		if rect.width() <= 0.0 || rect.height() <= 0.0 {
 			return;

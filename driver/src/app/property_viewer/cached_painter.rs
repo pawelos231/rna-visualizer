@@ -28,7 +28,7 @@ impl<T: Property + 'static> CachedPainter<T> {
 	/// Samples an [`AminoString`] across 100 evenly spaced
 	/// points and caches the results internally.
 	pub fn set(&mut self, protein: &AminoString) {
-		self.cache = <T as Property>::generate_cache(protein);
+		self.cache = <T as Property>::sample(protein);
 		self.result = <T as Property>::evaluate(protein, 1.1);
 	}
 
@@ -55,7 +55,7 @@ impl<T: Property + 'static> CachedPainter<T> {
 		ui.label(job);
 		ui.label(format!("{0:.2}", self.result));
 
-		drawer.show_samples(ui, self.cache);
+		drawer.show(ui, self.cache);
 
 		ui.end_row();
 	}
