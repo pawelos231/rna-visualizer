@@ -11,14 +11,23 @@ use super::extras::Extras;
 /// to choose from.
 #[derive(Default)]
 pub struct ProteinSelector {
+	/// Current page to display
 	page: usize,
+	/// Previously rendered page
 	last_render_page: usize,
+	/// A cache of paginated items
 	paginated: Vec<String>,
+	/// Index of the selected protein (page, entry)
+	selected_index: Option<(usize, usize)>,
 }
 
 impl ProteinSelector {
 	/// The number of proteins to draw per page.
 	const PAGINATION: usize = 100;
+	/// The background color of selected paginated results
+	const LIGHT_BUTTON: Color32 = Color32::from_gray(64);
+	/// The background color of paginated results
+	const DARK_BUTTON: Color32 = Color32::from_gray(46);
 
 	/// Draws self to the ui.
 	pub fn show(&mut self, ui: &mut Ui, proteins: &ProteinMap) -> Option<Rc<Protein>> {
@@ -37,6 +46,7 @@ impl ProteinSelector {
 	pub fn clear_cache(&mut self) {
 		self.page = 0;
 		self.paginated.clear();
+		self.selected_index = None;
 	}
 
 	/// A helper function that displays an appropriate message
@@ -122,7 +132,7 @@ impl ProteinSelector {
 		let mut result = None;
 		let button_width = ui.available_width();
 
-		for stringed in &self.paginated {
+		for (index, stringed) in self.paginated.iter().enumerate() {
 			let old_clip_rect = ui.clip_rect();
 
 			let cursor = ui.cursor().min.y;
@@ -140,11 +150,22 @@ impl ProteinSelector {
 			}
 
 			ui.allocate_ui_at_rect(rect, |ui| {
+				let selected = match self.selected_index {
+					Some((page, idx)) => page == self.page && idx == index,
+					None => false,
+				};
+
+				let color = match selected {
+					true => Self::LIGHT_BUTTON,
+					false => Self::DARK_BUTTON,
+				};
+
 				if ui
-					.add_sized([button_width, 30.], Button::new(stringed))
+					.add_sized([button_width, 30.], Button::new(stringed).fill(color))
 					.clicked()
 				{
 					result = proteins.get_by_string(stringed.clone());
+					self.selected_index = Some((self.page, index));
 				}
 			});
 
